@@ -5,12 +5,7 @@
   description = "Colum's NixOS configuration";
 
   inputs = {
-    nixpkgs = {
-	url = "github:NixOS/nixpkgs/nixos-25.05";
-	config = {
-		allowUnfree = true;
-	};
-    };
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
 
     home-manager = {
       url = "github:nix-community/home-manager/release-25.05";
@@ -23,7 +18,11 @@
     system = "x86_64-linux";
   in {
     nixosConfigurations.laptop = nixpkgs.lib.nixosSystem {
-      inherit system;
+      system = "x86_64-linux";
+	pkgs = import nixpkgs {
+		system = "x86_64-linux";
+		config.allowUnfree = true;
+	};
 
       modules = [
         ./configuration.nix
