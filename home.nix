@@ -12,6 +12,7 @@
   home.sessionVariables = {
     EDITOR = "nvim";
     VISUAL = "nvim";
+    NIXOS_OZONE_WL = "1";
   };
 
   programs.home-manager.enable = true;
@@ -29,6 +30,21 @@
     defaultEditor = true;
   };
 
+  programs.bash = {
+    enable = true;
+    shellAliases = {
+      rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#laptop";
+      update = "sudo nixos-rebuild switch --flake /etc/nixos#laptop --upgrade";
+      gco = "git checkout";
+      gs = "git status";
+      gl = "git log --oneline -10";
+      gp = "git push";
+    };
+  };
+
+  # ==========================================
+  # Hyprland
+  # ==========================================
   wayland.windowManager.hyprland = {
     enable = true;
     package = null;
@@ -37,6 +53,7 @@
     settings = {
       "$terminal" = "kitty";
       "$menu" = "wofi --show drun";
+      "$fileManager" = "kitty";
 
       monitor = ",preferred,auto,auto";
 
@@ -119,8 +136,8 @@
       };
 
       misc = {
-        force_default_wallpaper = -1;
-        disable_hyprland_logo = false;
+        force_default_wallpaper = 0;
+        disable_hyprland_logo = true;
       };
 
       gestures = {
@@ -128,6 +145,12 @@
       };
 
       "$mainMod" = "SUPER";
+
+      exec-once = [
+        "waybar"
+        "hyprpaper"
+        "dunst"
+      ];
 
       bind = [
         "$mainMod, Q, exec, $terminal"
@@ -140,6 +163,12 @@
 
         # Rebuild NixOS
         ''$mainMod CTRL SHIFT, R, exec, kitty --class nixos-rebuild -e sh -c 'sudo nixos-rebuild switch --flake /etc/nixos#laptop; echo "\nPress any key to close..."; read -n 1' ''
+
+        # Screenshots
+        ", Print, exec, grim -g \"$(slurp)\" - | wl-copy"
+        "$mainMod, Print, exec, grim - | wl-copy"
+        ", SHIFT Print, exec, grim -g \"$(slurp)\" ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png"
+        "$mainMod SHIFT, Print, exec, grim ~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png"
 
         # Focus
         "$mainMod, left, movefocus, l"
@@ -178,6 +207,11 @@
         ", XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
         ", XF86MonBrightnessUp, exec, brightnessctl set 5%+"
         ", XF86MonBrightnessDown, exec, brightnessctl set 5%-"
+
+        # Media player
+        ", XF86AudioPlay, exec, playerctl play-pause"
+        ", XF86AudioNext, exec, playerctl next"
+        ", XF86AudioPrev, exec, playerctl previous"
       ];
 
       bindm = [
@@ -188,7 +222,161 @@
       windowrule = [
         "suppressevent maximize, class:.*"
         "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
+        "float,class:^(pavucontrol)$"
+        "float,class:^(nm-connection-editor)$"
       ];
     };
+  };
+
+  # ==========================================
+  # Waybar
+  # ==========================================
+  programs.waybar = {
+    enable = true;
+    settings = {
+      mainBar = {
+        layer = "top";
+        position = "top";
+        height = 30;
+        spacing = 4;
+
+        modules-left = [ "hyprland/workspaces" ];
+        modules-center = [ "clock" ];
+        modules-right = [ "pulseaudio" "network" "battery" "tray" ];
+
+        "hyprland/workspaces" = {
+          format = "{name}";
+          on-click = "activate";
+        };
+
+        clock = {
+          format = "{:%H:%M}";
+          format-alt = "{:%A, %B %d, %Y}";
+          tooltip-format = "<tt>{calendar}</tt>";
+        };
+
+        pulseaudio = {
+          format = "{icon} {volume}%";
+          format-muted = " muted";
+          format-icons = {
+            default = [ "" "" "" ];
+          };
+          on-click = "pavucontrol";
+        };
+
+        network = {
+          format-wifi = "{signalStrength}%";
+          format-ethernet = "eth";
+          format-disconnected = "disconnected";
+          tooltip-format = "{ifname}: {ipaddr}";
+        };
+
+        battery = {
+          states = {
+            warning = 30;
+            critical = 15;
+          };
+          format = "{capacity}%";
+          format-charging = "{capacity}% ";
+          format-plugged = "{capacity}% ";
+          format-full = "{capacity}% ";
+        };
+
+        tray = {
+          spacing = 10;
+        };
+      };
+    };
+    style = ''
+      * {
+        font-family: "JetBrains Mono Nerd Font", monospace;
+        font-size: 13px;
+      }
+
+      window#waybar {
+        background-color: rgba(26, 27, 38, 0.85);
+        color: #cdd6f4;
+      }
+
+      #workspaces button {
+        padding: 0 5px;
+        color: #6c7086;
+        background-color: transparent;
+        border-radius: 5px;
+      }
+
+      #workspaces button.active {
+        color: #cdd6f4;
+        background-color: #45475a;
+      }
+
+      #clock, #battery, #pulseaudio, #network, #tray {
+        padding: 0 10px;
+      }
+
+      #battery.warning {
+        color: #fab387;
+      }
+
+      #battery.critical {
+        color: #f38ba8;
+      }
+    '';
+  };
+
+  # ==========================================
+  # hyprpaper
+  # ==========================================
+  xdg.configFile."hypr/hyprpaper.conf".text = ''
+    preload = ~/Pictures/wallpaper.png
+    wallpaper = , ~/Pictures/wallpaper.png
+    ipc = off
+  '';
+
+  # ==========================================
+  # Notification daemon (dunst)
+  # ==========================================
+  services.dunst = {
+    enable = true;
+    settings = {
+      global = {
+        monitor = 0;
+        follow = "mouse";
+        width = 300;
+        height = 100;
+        origin = "top-right";
+        offset = "10x10";
+        notification_limit = 5;
+        progress_bar = true;
+      };
+
+      urgency_low = {
+        background = "#1a1b26";
+        foreground = "#c0caf5";
+        timeout = 5;
+      };
+
+      urgency_normal = {
+        background = "#1a1b26";
+        foreground = "#c0caf5";
+        timeout = 10;
+      };
+
+      urgency_critical = {
+        background = "#1a1b26";
+        foreground = "#c0caf5";
+        timeout = 0;
+      };
+    };
+  };
+
+  # ==========================================
+  # NVChad (Neovim) config files
+  # ==========================================
+  xdg.configFile = {
+    "nvim/init.lua".source = ./nvim/init.lua;
+    "nvim/lazy-lock.json".source = ./nvim/lazy-lock.json;
+    "nvim/.stylua.toml".source = ./nvim/.stylua.toml;
+    "nvim/lua".source = ./nvim/lua;
   };
 }

@@ -104,7 +104,6 @@
   environment.systemPackages = with pkgs; [
 
     git
-    neovim
     kitty
     google-chrome
     wget
@@ -116,7 +115,18 @@
   	gnumake
   	unzip
   	wl-clipboard
-    
+
+    # Desktop utilities
+    wofi
+    brightnessctl
+    grim
+    slurp
+    playerctl
+    pavucontrol
+    hyprpaper
+    dunst
+    libnotify
+
   ];
 
   #################################
