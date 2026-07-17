@@ -328,8 +328,8 @@
   # hyprpaper
   # ==========================================
   xdg.configFile."hypr/hyprpaper.conf".text = ''
-    preload = ~/Pictures/wallpaper.png
-    wallpaper = , ~/Pictures/wallpaper.png
+    preload = ${pkgs.hyprland}/share/hypr/wall0.png
+    wallpaper = , ${pkgs.hyprland}/share/hypr/wall0.png
     ipc = off
   '';
 
