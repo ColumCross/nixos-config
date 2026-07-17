@@ -23,7 +23,7 @@
       read -n 1
     '')
     (pkgs.writeShellScriptBin "opencode-nixos" ''
-      cd /
+      cd /etc/nixos
       exec opencode
     '')
     (pkgs.writeShellScriptBin "nvim-nixos" ''
@@ -181,11 +181,15 @@
         # Rebuild NixOS
         "$mainMod CTRL SHIFT, R, exec, kitty --class nixos-rebuild -e rebuild-nixos"
 
-        # OpenCode on /
+        # OpenCode on /etc/nixos
         "$mainMod CTRL, C, exec, kitty --class opencode -e opencode-nixos"
 
         # Neovim on /etc/nixos
         "$mainMod CTRL SHIFT, C, exec, kitty --class neovim-edit -e nvim-nixos"
+
+        # Applications
+        "$mainMod, W, exec, google-chrome-stable"
+        "$mainMod, D, exec, discord"
 
         # Screenshots
         ", Print, exec, grim -g \"$(slurp)\" - | wl-copy"
