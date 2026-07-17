@@ -318,7 +318,7 @@
       mainBar = {
         layer = "top";
         position = "top";
-        height = 48;
+        height = 24;
         spacing = 2;
 
         modules-left = [ "hyprland/workspaces" ];
@@ -844,6 +844,6 @@
     "nvim/lua".source = ./nvim/lua;
 
     # GTK4 theme for hyprKCS
-    "gtk-4.0/gtk.css".source = ./gtk-4.0/gtk.css;
+    #"gtk-4.0/gtk.css".source = ./gtk-4.0/gtk.css;
   };
 }
