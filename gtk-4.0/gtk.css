@@ -1,0 +1,201 @@
+/* ==========================================
+   hyprKCS GTK4 Theme
+   Scoped via @media (color-scheme) for dark/light switching.
+   Dark theme active now; light theme placeholder.
+   ========================================== */
+
+/* ==========================================
+   Dark Theme
+   ========================================== */
+@media (color-scheme: dark) {
+
+  /* --- Base --- */
+  window {
+    background-color: #000000;
+    color: #00ffff;
+    font-family: 'JetBrainsMono Nerd Font', monospace;
+    font-size: 13px;
+    border: none;
+    border-radius: 0;
+  }
+
+  /* --- Text --- */
+  label {
+    color: #00ffff;
+  }
+
+  titlebar,
+  headerbar {
+    background-color: #000000;
+    color: #00ffff;
+    border-bottom: 2px solid #00ffff;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /* --- Buttons --- */
+  button {
+    background-color: transparent;
+    color: #00ffff;
+    border: 1px solid #00ffff;
+    border-radius: 0;
+    padding: 4px 12px;
+    box-shadow: none;
+  }
+
+  button:hover {
+    background-color: rgba(0, 255, 255, 0.15);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+  }
+
+  button:active,
+  button:checked {
+    background-color: rgba(0, 255, 255, 0.25);
+  }
+
+  /* --- Keyboard visual map keys --- */
+  box.key {
+    background-color: rgba(0, 255, 255, 0.08);
+    color: #00ffff;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 0;
+  }
+
+  box.key:hover {
+    background-color: rgba(0, 255, 255, 0.2);
+    border-color: #00ffff;
+  }
+
+  box.key.active {
+    background-color: rgba(0, 255, 255, 0.3);
+    border-color: #00ffff;
+    color: #ffffff;
+  }
+
+  /* --- Lists and rows --- */
+  row {
+    background-color: #000000;
+    color: #00ffff;
+    padding: 4px 8px;
+  }
+
+  row:selected {
+    background-color: rgba(0, 255, 255, 0.15);
+  }
+
+  row:hover {
+    background-color: rgba(0, 255, 255, 0.08);
+  }
+
+  list {
+    background-color: #000000;
+  }
+
+  /* --- Separators --- */
+  separator {
+    background-color: rgba(0, 255, 255, 0.2);
+    min-height: 1px;
+  }
+
+  /* --- Scrollbars --- */
+  scrollbar {
+    background-color: transparent;
+  }
+
+  scrollbar slider {
+    background-color: rgba(0, 255, 255, 0.3);
+    border-radius: 0;
+    min-width: 6px;
+    min-height: 6px;
+  }
+
+  scrollbar slider:hover {
+    background-color: #00ffff;
+  }
+
+  /* --- Entry fields --- */
+  entry {
+    background-color: rgba(0, 255, 255, 0.05);
+    color: #00ffff;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 0;
+    caret-color: #00ffff;
+  }
+
+  entry:focus {
+    border-color: #00ffff;
+  }
+
+  /* --- Checkboxes and radio buttons --- */
+  check,
+  radio {
+    background-color: transparent;
+    color: #00ffff;
+    border: 1px solid #00ffff;
+    border-radius: 0;
+  }
+
+  check:checked,
+  radio:checked {
+    background-color: #00ffff;
+    color: #000000;
+  }
+
+  /* --- Dropdowns / comboboxes --- */
+  combobox button {
+    background-color: transparent;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 0;
+  }
+
+  /* --- Switches --- */
+  switch {
+    background-color: rgba(0, 255, 255, 0.1);
+    border-radius: 0;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+  }
+
+  switch:checked {
+    background-color: #00ffff;
+  }
+
+  switch slider {
+    background-color: #000000;
+    border-radius: 0;
+  }
+
+  /* --- Tooltips --- */
+  tooltip {
+    background-color: #000000;
+    color: #00ffff;
+    border: 1px solid #00ffff;
+    border-radius: 0;
+  }
+
+  /* --- Popovers and dialogs --- */
+  popover,
+  dialog {
+    background-color: #000000;
+    color: #00ffff;
+    border: 1px solid #00ffff;
+    border-radius: 0;
+  }
+
+  /* --- Sidebar / panels --- */
+  .sidebar {
+    background-color: #000000;
+    border-right: 1px solid rgba(0, 255, 255, 0.2);
+  }
+
+  /* --- Dimming behind overlay --- */
+  .dim-label {
+    color: rgba(0, 255, 255, 0.4);
+  }
+}
+
+/* ==========================================
+   Light Theme (placeholder)
+   ========================================== */
+@media (color-scheme: light) {
+  /* To be implemented */
+}
