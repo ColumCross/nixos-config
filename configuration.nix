@@ -128,8 +128,6 @@
     hyprlock
     dunst
     libnotify
-    nerd-dictation
-    wtype
     spotify-player
 
   ];

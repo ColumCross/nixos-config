@@ -281,13 +281,6 @@
         ", XF86AudioPlay, exec, playerctl play-pause"
         ", XF86AudioNext, exec, playerctl next"
         ", XF86AudioPrev, exec, playerctl previous"
-
-        # Nerd dictation push-to-talk (hold Super+N to speak)
-        ", SUPER_N, exec, nerd-dictation begin --cookie=/tmp/nerd-dictation-cookie --simulate-input-tool=WTYPE --suspend-on-start"
-      ];
-
-      bindel = [
-        ", SUPER_N, exec, nerd-dictation end --cookie=/tmp/nerd-dictation-cookie"
       ];
 
       bindl = [
