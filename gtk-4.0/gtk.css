@@ -6,7 +6,7 @@
 /* --- Base --- */
 window {
   background-color: #000000;
-  color: #00ffff;
+  color: #ffffff;
   font-family: 'JetBrainsMono Nerd Font', monospace;
   font-size: 13px;
   border: none;
@@ -15,15 +15,15 @@ window {
 
 /* --- Text --- */
 label {
-  color: #00ffff;
+  color: #ffffff;
 }
 
 /* --- Titlebar --- */
 titlebar,
 headerbar {
   background-color: #000000;
-  color: #00ffff;
-  border-bottom: 2px solid #00ffff;
+  color: #ffffff;
+  border-bottom: 2px solid #ffffff;
   border-radius: 0;
   box-shadow: none;
 }
@@ -31,39 +31,39 @@ headerbar {
 /* --- Buttons --- */
 button {
   background-color: transparent;
-  color: #00ffff;
-  border: 1px solid #00ffff;
+  color: #ffffff;
+  border: 1px solid #ffffff;
   border-radius: 0;
   padding: 4px 12px;
   box-shadow: none;
 }
 
 button:hover {
-  background-color: rgba(0, 255, 255, 0.15);
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 button:active,
 button:checked {
-  background-color: rgba(0, 255, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.25);
 }
 
 /* --- Keyboard visual map keys --- */
 box.key {
-  background-color: rgba(0, 255, 255, 0.08);
-  color: #00ffff;
-  border: 1px solid rgba(0, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 0;
 }
 
 box.key:hover {
-  background-color: rgba(0, 255, 255, 0.2);
-  border-color: #00ffff;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: #ffffff;
 }
 
 box.key.active {
-  background-color: rgba(0, 255, 255, 0.3);
-  border-color: #00ffff;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-color: #ffffff;
   color: #ffffff;
 }
 
@@ -74,21 +74,21 @@ list {
 
 row {
   background-color: #000000;
-  color: #00ffff;
+  color: #ffffff;
   padding: 4px 8px;
 }
 
 row:selected {
-  background-color: rgba(0, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 row:hover {
-  background-color: rgba(0, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 /* --- Separators --- */
 separator {
-  background-color: rgba(0, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.2);
   min-height: 1px;
 }
 
@@ -98,60 +98,60 @@ scrollbar {
 }
 
 scrollbar slider {
-  background-color: rgba(0, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.3);
   border-radius: 0;
   min-width: 6px;
   min-height: 6px;
 }
 
 scrollbar slider:hover {
-  background-color: #00ffff;
+  background-color: #ffffff;
 }
 
 /* --- Entry fields --- */
 entry {
-  background-color: rgba(0, 255, 255, 0.05);
-  color: #00ffff;
-  border: 1px solid rgba(0, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 0;
-  caret-color: #00ffff;
+  caret-color: #ffffff;
 }
 
 entry:focus {
-  border-color: #00ffff;
+  border-color: #ffffff;
 }
 
 /* --- Checkboxes and radio buttons --- */
 check,
 radio {
   background-color: transparent;
-  color: #00ffff;
-  border: 1px solid #00ffff;
+  color: #ffffff;
+  border: 1px solid #ffffff;
   border-radius: 0;
 }
 
 check:checked,
 radio:checked {
-  background-color: #00ffff;
+  background-color: #ffffff;
   color: #000000;
 }
 
 /* --- Dropdowns / comboboxes --- */
 combobox button {
   background-color: transparent;
-  border: 1px solid rgba(0, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 0;
 }
 
 /* --- Switches --- */
 switch {
-  background-color: rgba(0, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.1);
   border-radius: 0;
-  border: 1px solid rgba(0, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 switch:checked {
-  background-color: #00ffff;
+  background-color: #ffffff;
 }
 
 switch slider {
@@ -162,8 +162,8 @@ switch slider {
 /* --- Tooltips --- */
 tooltip {
   background-color: #000000;
-  color: #00ffff;
-  border: 1px solid #00ffff;
+  color: #ffffff;
+  border: 1px solid #ffffff;
   border-radius: 0;
 }
 
@@ -171,18 +171,18 @@ tooltip {
 popover,
 dialog {
   background-color: #000000;
-  color: #00ffff;
-  border: 1px solid #00ffff;
+  color: #ffffff;
+  border: 1px solid #ffffff;
   border-radius: 0;
 }
 
 /* --- Sidebar / panels --- */
 .sidebar {
   background-color: #000000;
-  border-right: 1px solid rgba(0, 255, 255, 0.2);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* --- Dimming behind overlay --- */
 .dim-label {
-  color: rgba(0, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.4);
 }
