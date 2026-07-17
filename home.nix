@@ -170,9 +170,9 @@
       ];
 
       bind = [
-        "$mainMod, Q, exec, $terminal"
+        "$mainMod, T, exec, $terminal"
         "$mainMod, A, exec, $menu"
-        "$mainMod, C, killactive,"
+        "$mainMod, Q, killactive,"
         "$mainMod, M, exit,"
         "$mainMod, V, togglefloating,"
         "$mainMod, P, pseudo,"
