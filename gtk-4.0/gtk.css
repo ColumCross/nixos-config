@@ -1,15 +1,10 @@
 /* ==========================================
-   hyprKCS GTK4 Theme
-   Scoped via .dark / .light window classes for theme switching.
-   Dark theme active now; light theme placeholder.
-   ========================================== */
-
-/* ==========================================
-   Dark Theme
+   hyprKCS GTK4 Theme — flat, terminal-style
+   Global styles (no theme scoping).
    ========================================== */
 
 /* --- Base --- */
-window.dark {
+window {
   background-color: #000000;
   color: #00ffff;
   font-family: 'JetBrainsMono Nerd Font', monospace;
@@ -19,13 +14,13 @@ window.dark {
 }
 
 /* --- Text --- */
-window.dark label {
+label {
   color: #00ffff;
 }
 
 /* --- Titlebar --- */
-window.dark titlebar,
-window.dark headerbar {
+titlebar,
+headerbar {
   background-color: #000000;
   color: #00ffff;
   border-bottom: 2px solid #00ffff;
@@ -34,7 +29,7 @@ window.dark headerbar {
 }
 
 /* --- Buttons --- */
-window.dark button {
+button {
   background-color: transparent;
   color: #00ffff;
   border: 1px solid #00ffff;
@@ -43,78 +38,78 @@ window.dark button {
   box-shadow: none;
 }
 
-window.dark button:hover {
+button:hover {
   background-color: rgba(0, 255, 255, 0.15);
   box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
 }
 
-window.dark button:active,
-window.dark button:checked {
+button:active,
+button:checked {
   background-color: rgba(0, 255, 255, 0.25);
 }
 
 /* --- Keyboard visual map keys --- */
-window.dark box.key {
+box.key {
   background-color: rgba(0, 255, 255, 0.08);
   color: #00ffff;
   border: 1px solid rgba(0, 255, 255, 0.3);
   border-radius: 0;
 }
 
-window.dark box.key:hover {
+box.key:hover {
   background-color: rgba(0, 255, 255, 0.2);
   border-color: #00ffff;
 }
 
-window.dark box.key.active {
+box.key.active {
   background-color: rgba(0, 255, 255, 0.3);
   border-color: #00ffff;
   color: #ffffff;
 }
 
 /* --- Lists and rows --- */
-window.dark list {
+list {
   background-color: #000000;
 }
 
-window.dark row {
+row {
   background-color: #000000;
   color: #00ffff;
   padding: 4px 8px;
 }
 
-window.dark row:selected {
+row:selected {
   background-color: rgba(0, 255, 255, 0.15);
 }
 
-window.dark row:hover {
+row:hover {
   background-color: rgba(0, 255, 255, 0.08);
 }
 
 /* --- Separators --- */
-window.dark separator {
+separator {
   background-color: rgba(0, 255, 255, 0.2);
   min-height: 1px;
 }
 
 /* --- Scrollbars --- */
-window.dark scrollbar {
+scrollbar {
   background-color: transparent;
 }
 
-window.dark scrollbar slider {
+scrollbar slider {
   background-color: rgba(0, 255, 255, 0.3);
   border-radius: 0;
   min-width: 6px;
   min-height: 6px;
 }
 
-window.dark scrollbar slider:hover {
+scrollbar slider:hover {
   background-color: #00ffff;
 }
 
 /* --- Entry fields --- */
-window.dark entry {
+entry {
   background-color: rgba(0, 255, 255, 0.05);
   color: #00ffff;
   border: 1px solid rgba(0, 255, 255, 0.3);
@@ -122,50 +117,50 @@ window.dark entry {
   caret-color: #00ffff;
 }
 
-window.dark entry:focus {
+entry:focus {
   border-color: #00ffff;
 }
 
 /* --- Checkboxes and radio buttons --- */
-window.dark check,
-window.dark radio {
+check,
+radio {
   background-color: transparent;
   color: #00ffff;
   border: 1px solid #00ffff;
   border-radius: 0;
 }
 
-window.dark check:checked,
-window.dark radio:checked {
+check:checked,
+radio:checked {
   background-color: #00ffff;
   color: #000000;
 }
 
 /* --- Dropdowns / comboboxes --- */
-window.dark combobox button {
+combobox button {
   background-color: transparent;
   border: 1px solid rgba(0, 255, 255, 0.3);
   border-radius: 0;
 }
 
 /* --- Switches --- */
-window.dark switch {
+switch {
   background-color: rgba(0, 255, 255, 0.1);
   border-radius: 0;
   border: 1px solid rgba(0, 255, 255, 0.3);
 }
 
-window.dark switch:checked {
+switch:checked {
   background-color: #00ffff;
 }
 
-window.dark switch slider {
+switch slider {
   background-color: #000000;
   border-radius: 0;
 }
 
 /* --- Tooltips --- */
-window.dark tooltip {
+tooltip {
   background-color: #000000;
   color: #00ffff;
   border: 1px solid #00ffff;
@@ -173,8 +168,8 @@ window.dark tooltip {
 }
 
 /* --- Popovers and dialogs --- */
-window.dark popover,
-window.dark dialog {
+popover,
+dialog {
   background-color: #000000;
   color: #00ffff;
   border: 1px solid #00ffff;
@@ -182,19 +177,12 @@ window.dark dialog {
 }
 
 /* --- Sidebar / panels --- */
-window.dark .sidebar {
+.sidebar {
   background-color: #000000;
   border-right: 1px solid rgba(0, 255, 255, 0.2);
 }
 
 /* --- Dimming behind overlay --- */
-window.dark .dim-label {
+.dim-label {
   color: rgba(0, 255, 255, 0.4);
-}
-
-/* ==========================================
-   Light Theme (placeholder)
-   ========================================== */
-window.light {
-  /* To be implemented */
 }
