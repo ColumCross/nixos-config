@@ -104,16 +104,19 @@
   environment.systemPackages = with pkgs; [
 
     git
-
     neovim
-
     kitty
-
     google-chrome
-
     wget
-
     curl
+    discord
+    ripgrep
+    fd
+    gcc
+  	gnumake
+  	unzip
+  	wl-clipboard
+    
   ];
 
   #################################

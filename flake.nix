@@ -6,6 +6,8 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    claude-desktop.url = "github:aaddrick/claude-desktop-debian";
+    opencode.url = "github:anomalyco/opencode";
 
     home-manager = {
       url = "github:nix-community/home-manager/release-25.05";
@@ -13,7 +15,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }:
+  outputs = { self, nixpkgs, home-manager, claude-desktop, opencode, ... }:
   let
     system = "x86_64-linux";
   in {
@@ -24,7 +26,13 @@
 		config.allowUnfree = true;
 	};
 
-      modules = [
+  modules = [
+    ({ pkgs, ... }: {
+      environment.systemPackages = [ 
+		    claude-desktop.packages.${pkgs.system}.default
+        opencode.packages.${pkgs.system}.default
+	    ];
+	  })
         ./configuration.nix
 
         home-manager.nixosModules.home-manager
