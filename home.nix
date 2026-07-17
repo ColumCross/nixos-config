@@ -108,11 +108,12 @@
       "$menu" = "rofi -show drun";
       "$fileManager" = "dolphin";
 
-      monitor = ",preferred,auto,auto";
+      monitor = ",preferred,auto,1.25";
 
       env = [
         "XCURSOR_SIZE,24"
         "HYPRCURSOR_SIZE,24"
+        "GTK_APPLICATION_PREFER_DARK_THEME,1"
       ];
 
       input = {
@@ -124,7 +125,7 @@
       };
 
       general = {
-        gaps_in = 5;
+        gaps_in = 2;
         gaps_out = 5;
         border_size = 2;
         "col.active_border" = "rgba(33ccffee) rgba(00ff99ee) 45deg";
@@ -209,7 +210,8 @@
 
       bind = [
         "$mainMod, T, exec, $terminal"
-        "$mainMod, D, exec, $menu"
+        "$mainMod, S, exec, $menu"
+        "$mainMod, D, exec, discord"
         "$mainMod, Q, killactive,"
         "$mainMod SHIFT, Q, exit,"
         "$mainMod, V, togglefloating,"
@@ -217,6 +219,7 @@
         "$mainMod, P, pseudo,"
         "$mainMod, J, togglesplit,"
         "$mainMod SHIFT, L, exec, hyprlock"
+        "$mainMod, slash, exec, hyprkcs"
         "$mainMod, O, exec, $terminal opencode"
 
         # Rebuild NixOS
@@ -270,8 +273,8 @@
         "$mainMod, X, workspace, e+1"
 
         # Media keys
-        ", XF86AudioRaiseVolume, exec, wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"
-        ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
+        ", XF86AudioRaiseVolume, exec, wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 1%+"
+        ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%-"
         ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
         ", XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
         ", XF86MonBrightnessUp, exec, brightnessctl set 5%+"
@@ -298,8 +301,9 @@
         "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
         "float,class:^(pavucontrol)$"
         "float,class:^(nm-connection-editor)$"
+        "float,class:^(hyprkcs)$"
+        "center,class:^(hyprkcs)$"
         "rounding 5, class:^(kitty)$"
-        "no_blur, class:^(kitty)$"
         "suppressevent fullscreen, class:^(kitty)$"
       ];
     };
@@ -320,17 +324,17 @@
         modules-left = [ "hyprland/workspaces" ];
         modules-center = [];
         modules-right = [
-          "pulseaudio"
-          "custom/sep1"
           "network"
-          "custom/sep2"
+          "custom/sep1"
           "cpu"
-          "custom/sep3"
+          "custom/sep2"
           "memory"
-          "custom/sep4"
-          "battery"
-          "custom/sep5"
+          "custom/sep3"
           "backlight"
+          "custom/sep4"
+          "pulseaudio"
+          "custom/sep5"
+          "battery"
           "custom/sep6"
           "clock"
           "tray"
@@ -342,7 +346,7 @@
         };
 
         clock = {
-          format = "{:%I:%M %p}";
+          format = "{:%m/%d %I:%M %p}";
           format-alt = "{:%Y-%m-%d}";
           tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
           interval = 60;
@@ -363,8 +367,8 @@
         };
 
         pulseaudio = {
-          format = "{icon} {volume}%";
-          format-muted = " muted";
+          format = "󰕾 {volume}%";
+          format-muted = "󰝟 muted";
           format-icons = {
             default = [ "" "" "" ];
           };
@@ -390,14 +394,14 @@
             warning = 30;
             critical = 15;
           };
-          format = "{capacity}% {icon}";
-          format-charging = "{capacity}% ";
-          format-plugged = "{capacity}% ";
+          format = "BAT {capacity}%";
+          format-charging = "󰂄 BAT {capacity}%";
+          format-plugged = "󰂄 BAT {capacity}%";
           format-icons = [ "" "" "" "" "" ];
         };
 
         backlight = {
-          format = "{percent}% ";
+          format = "󰃠 {percent}%";
           interval = 2;
         };
 
@@ -431,7 +435,7 @@
       @define-color black-gradient #0a0a0a;
 
       * {
-        font-family: 'JetBrains Mono', 'Noto Sans Mono', 'Font Awesome 6 Free', 'Font Awesome 6 Brands', monospace;
+        font-family: 'JetBrainsMono Nerd Font', 'JetBrains Mono', 'Noto Sans Mono', 'Font Awesome 6 Free', 'Font Awesome 6 Brands', monospace;
         font-size: 13px;
         font-weight: 500;
       }
@@ -476,7 +480,7 @@
       #bluetooth, #pulseaudio, #wireplumber, #custom-media, #tray,
       #mode, #scratchpad, #power-profiles-daemon, #mpd, #language,
       #keyboard-state, #privacy-item {
-        padding: 4px 12px;
+        padding: 1px 12px;
         margin: 0;
         background: transparent;
         border: none;
@@ -838,5 +842,8 @@
     "nvim/lazy-lock.json".source = ./nvim/lazy-lock.json;
     "nvim/.stylua.toml".source = ./nvim/.stylua.toml;
     "nvim/lua".source = ./nvim/lua;
+
+    # GTK4 theme for hyprKCS
+    "gtk-4.0/gtk.css".source = ./gtk-4.0/gtk.css;
   };
 }
