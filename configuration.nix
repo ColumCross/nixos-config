@@ -117,15 +117,19 @@
   	wl-clipboard
 
     # Desktop utilities
-    wofi
+    rofi
     brightnessctl
     grim
     slurp
     playerctl
     pavucontrol
     hyprpaper
+    hypridle
+    hyprlock
     dunst
     libnotify
+    nerd-dictation
+    wtype
     spotify-player
 
   ];
