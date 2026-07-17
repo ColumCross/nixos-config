@@ -15,6 +15,15 @@
     NIXOS_OZONE_WL = "1";
   };
 
+  home.packages = [
+    (pkgs.writeShellScriptBin "rebuild-nixos" ''
+      sudo nixos-rebuild switch --flake /etc/nixos#laptop
+      echo ""
+      echo "Press any key to close..."
+      read -n 1
+    '')
+  ];
+
   programs.home-manager.enable = true;
 
   programs.git = {
@@ -162,7 +171,7 @@
         "$mainMod, J, togglesplit,"
 
         # Rebuild NixOS
-        ''$mainMod CTRL SHIFT, R, exec, kitty --class nixos-rebuild -e sh -c 'sudo nixos-rebuild switch --flake /etc/nixos#laptop; echo "\nPress any key to close..."; read -n 1' ''
+        "$mainMod CTRL SHIFT, R, exec, kitty --class nixos-rebuild -e rebuild-nixos"
 
         # Screenshots
         ", Print, exec, grim -g \"$(slurp)\" - | wl-copy"
