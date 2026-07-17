@@ -126,6 +126,7 @@
     hyprpaper
     dunst
     libnotify
+    spotify-tui
 
   ];
 
