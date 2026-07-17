@@ -22,6 +22,14 @@
       echo "Press any key to close..."
       read -n 1
     '')
+    (pkgs.writeShellScriptBin "opencode-nixos" ''
+      cd /
+      exec opencode
+    '')
+    (pkgs.writeShellScriptBin "nvim-nixos" ''
+      cd /etc/nixos
+      exec nvim .
+    '')
   ];
 
   programs.home-manager.enable = true;
@@ -172,6 +180,12 @@
 
         # Rebuild NixOS
         "$mainMod CTRL SHIFT, R, exec, kitty --class nixos-rebuild -e rebuild-nixos"
+
+        # OpenCode on /
+        "$mainMod CTRL, C, exec, kitty --class opencode -e opencode-nixos"
+
+        # Neovim on /etc/nixos
+        "$mainMod CTRL SHIFT, C, exec, kitty --class neovim-edit -e nvim-nixos"
 
         # Screenshots
         ", Print, exec, grim -g \"$(slurp)\" - | wl-copy"
