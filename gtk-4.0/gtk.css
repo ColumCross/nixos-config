@@ -1,29 +1,28 @@
 /* ==========================================
    hyprKCS GTK4 Theme
-   Scoped via @media (color-scheme) for dark/light switching.
+   Scoped via .dark / .light window classes for theme switching.
    Dark theme active now; light theme placeholder.
    ========================================== */
 
 /* ==========================================
    Dark Theme
    ========================================== */
-@media (color-scheme: dark) {
+window.dark {
 
   /* --- Base --- */
-  window {
-    background-color: #000000;
-    color: #00ffff;
-    font-family: 'JetBrainsMono Nerd Font', monospace;
-    font-size: 13px;
-    border: none;
-    border-radius: 0;
-  }
+  background-color: #000000;
+  color: #00ffff;
+  font-family: 'JetBrainsMono Nerd Font', monospace;
+  font-size: 13px;
+  border: none;
+  border-radius: 0;
 
   /* --- Text --- */
   label {
     color: #00ffff;
   }
 
+  /* --- Titlebar --- */
   titlebar,
   headerbar {
     background-color: #000000;
@@ -196,6 +195,6 @@
 /* ==========================================
    Light Theme (placeholder)
    ========================================== */
-@media (color-scheme: light) {
+window.light {
   /* To be implemented */
 }
