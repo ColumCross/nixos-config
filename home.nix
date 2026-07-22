@@ -16,6 +16,7 @@
   };
 
   home.packages = [
+    pkgs.networkmanager_dmenu
     (pkgs.writeShellScriptBin "rebuild-nixos" ''
       sudo nixos-rebuild switch --flake /etc/nixos#laptop
       echo ""
@@ -203,6 +204,7 @@
 
       exec-once = [
         "nm-applet"
+        "blueman-applet"
         "waybar"
         "hyprpaper"
         "hypridle"
@@ -233,6 +235,7 @@
         "$mainMod CTRL SHIFT, C, exec, kitty --class neovim-edit -e nvim-nixos"
 
         # Applications
+        "$mainMod, B, exec, blueman-manager"
         "$mainMod, W, exec, google-chrome-stable"
 
         # Screenshots
@@ -302,6 +305,8 @@
         "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
         "float,class:^(pavucontrol)$"
         "float,class:^(nm-connection-editor)$"
+        "float,class:^(blueman-manager)$"
+        "center,class:^(blueman-manager)$"
         "float,class:^(hyprkcs)$"
         "center,class:^(hyprkcs)$"
         "rounding 5, class:^(kitty)$"
@@ -326,6 +331,7 @@
         modules-center = [];
         modules-right = [
           "network"
+          "bluetooth"
           "custom/sep1"
           "cpu"
           "custom/sep2"
@@ -377,17 +383,26 @@
         };
 
         network = {
-          format-wifi = "{essid} ";
-          format-ethernet = " {ipaddr}";
-          format-linked = "";
-          format-disconnected = "";
+          format = "{icon} {essid}";
+          format-ethernet = "{icon} {ipaddr}";
+          format-linked = "{icon} {ifname}";
+          format-disconnected = "󰤭";
+          format-icons = ["󰤯" "󰤟" "󰤢" "󰤥" "󰤨"];
           tooltip = true;
           tooltip-format = "{ifname} via {gwaddr}";
           tooltip-format-wifi = "{essid} ({signalStrength}%)\nFrequency: {frequency}MHz\nIP: {ipaddr}";
           tooltip-format-ethernet = "{ifname}\nIP: {ipaddr}\nGateway: {gwaddr}";
           tooltip-format-disconnected = "Disconnected";
-          on-click = "nm-connection-editor";
+          on-click = "networkmanager_dmenu";
           interval = 10;
+        };
+
+        bluetooth = {
+          format = "󰂯";
+          format-connected = "󰂱 {num_connections}";
+          format-disabled = "󰂲";
+          tooltip-format = "{controller_alias}\n{device_enumerate}";
+          on-click = "blueman-manager";
         };
 
         battery = {

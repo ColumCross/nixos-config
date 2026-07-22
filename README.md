@@ -1,6 +1,3 @@
-# =========================
-# README.md
-# =========================
 # NixOS Configuration
 
 This repository contains my complete NixOS system configuration.

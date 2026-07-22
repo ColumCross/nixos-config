@@ -62,3 +62,4 @@
 - **Do NOT have a manual `~/.bashrc`**: `programs.bash.enable = true` in Home Manager manages `~/.bashrc`. An existing file will cause the HM activation to fail. If it does, back up and remove the manual file.
 - **`sudo` is required for rebuilds**: The `nixos-rebuild switch` command always needs sudo. Wrapper scripts handle this.
 - **Flake uses committed git state**: All changes to files in `/etc/nixos/` must be committed before running `nixos-rebuild switch --flake`. Uncommitted changes are invisible to the flake.
+- You may always git commit, but never git push

@@ -60,6 +60,15 @@
   security.rtkit.enable = true;
 
   #################################
+  ## Bluetooth
+  #################################
+
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+  };
+
+  #################################
   ## XDG Portal
   #################################
 
@@ -92,6 +101,7 @@
     extraGroups = [
       "wheel"
       "networkmanager"
+      "bluetooth"
     ];
 
     shell = pkgs.bash;
@@ -129,6 +139,7 @@
     dunst
     libnotify
     spotify-player
+    blueman
 
   ];
 
