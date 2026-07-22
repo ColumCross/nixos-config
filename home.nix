@@ -108,7 +108,7 @@
       "$menu" = "rofi -show drun";
       "$fileManager" = "dolphin";
 
-      monitor = ",preferred,auto,1.0";
+      monitor = ",preferred,auto,1.2";
 
       env = [
         "XCURSOR_SIZE,24"
