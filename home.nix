@@ -343,6 +343,7 @@
           "custom/sep5"
           "battery"
           "custom/sep6"
+          "custom/power"
           "clock"
           "tray"
         ];
@@ -432,6 +433,12 @@
         "custom/sep4" = { format = "|"; tooltip = false; };
         "custom/sep5" = { format = "|"; tooltip = false; };
         "custom/sep6" = { format = "|"; tooltip = false; };
+
+        "custom/power" = {
+          format = "⏻";
+          tooltip = false;
+          on-click = "wlogout -p layer-shell";
+        };
       };
     };
     style = ''
@@ -511,6 +518,16 @@
         opacity: 0.4;
         padding: 0 4px;
         margin: 0;
+      }
+
+      #custom-power {
+        color: @red;
+        padding: 1px 12px;
+        margin: 0;
+      }
+      #custom-power:hover {
+        color: @pink;
+        text-shadow: 0 0 10px @pink;
       }
 
       #cpu { color: @teal; }

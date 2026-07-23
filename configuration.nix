@@ -141,6 +141,7 @@
     libnotify
     spotify-player
     blueman
+    wlogout
 
   ];
 
@@ -154,6 +155,7 @@
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
+    font-awesome
   ];
 
   #################################
