@@ -220,7 +220,7 @@
         "$mainMod, V, togglefloating,"
         "$mainMod, F, fullscreen"
         "$mainMod, P, pseudo,"
-        "$mainMod, J, togglesplit,"
+        "$mainMod, N, togglesplit,"
         "$mainMod SHIFT, L, exec, hyprlock"
         "$mainMod, slash, exec, hyprkcs"
         "$mainMod, O, exec, $terminal opencode"
@@ -273,8 +273,8 @@
         "$mainMod SHIFT, 0, movetoworkspace, 10"
 
         # Navigate workspaces with Z/X
-        "$mainMod, Z, workspace, e-1"
-        "$mainMod, X, workspace, e+1"
+        "$mainMod, left, workspace, e-1"
+        "$mainMod, right, workspace, e+1"
       ];
 
       bindel = [
