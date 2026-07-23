@@ -18,7 +18,7 @@
   home.packages = [
     pkgs.networkmanager_dmenu
     (pkgs.writeShellScriptBin "rebuild-nixos" ''
-      sudo nixos-rebuild switch --flake /etc/nixos#laptop
+      sudo nixos-rebuild switch --flake /etc/nixos#laptop --impure
       echo ""
       echo "Press any key to close..."
       read -n 1
@@ -88,8 +88,8 @@
   programs.bash = {
     enable = true;
     shellAliases = {
-      rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#laptop";
-      update = "sudo nixos-rebuild switch --flake /etc/nixos#laptop --upgrade";
+      rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#laptop --impure";
+      update = "sudo nixos-rebuild switch --flake /etc/nixos#laptop --impure --upgrade";
       gco = "git checkout";
       gs = "git status";
       gl = "git log --oneline -10";

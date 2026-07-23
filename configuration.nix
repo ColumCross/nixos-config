@@ -6,6 +6,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    /etc/nixos-modules/nix_modules/nordvpn-module.nix
   ];
 
   #################################
@@ -142,6 +143,10 @@
     blueman
 
   ];
+
+  # NordVPN configuration
+  custom.services.nordvpn.enable = true;
+  users.groups.nordvpn.members = ["colum"];
 
   #################################
   ## Fonts
