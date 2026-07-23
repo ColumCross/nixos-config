@@ -275,10 +275,18 @@
         # Navigate workspaces with Z/X
         "$mainMod, Z, workspace, e-1"
         "$mainMod, X, workspace, e+1"
+      ];
 
+      bindel = [
         # Media keys
         ", XF86AudioRaiseVolume, exec, wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 1%+"
         ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%-"
+      ];
+
+      bindl = [
+        ", switch:on:Lid Switch, exec, ~/.config/hypr/lid_handler.sh close"
+        ", switch:off:Lid Switch, exec, ~/.config/hypr/lid_handler.sh open"
+
         ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
         ", XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
         ", XF86MonBrightnessUp, exec, brightnessctl set 5%+"
@@ -288,11 +296,6 @@
         ", XF86AudioPlay, exec, playerctl play-pause"
         ", XF86AudioNext, exec, playerctl next"
         ", XF86AudioPrev, exec, playerctl previous"
-      ];
-
-      bindl = [
-        ", switch:on:Lid Switch, exec, ~/.config/hypr/lid_handler.sh close"
-        ", switch:off:Lid Switch, exec, ~/.config/hypr/lid_handler.sh open"
       ];
 
       bindm = [
@@ -343,9 +346,9 @@
           "custom/sep5"
           "battery"
           "custom/sep6"
-          "custom/power"
           "clock"
           "tray"
+          "custom/power"
         ];
 
         "hyprland/workspaces" = {
@@ -711,7 +714,7 @@
           color = "rgba(0, 0, 0, 1.0)";
           font_size = 120;
           font_family = "JetBrainsMono Nerd Font ExtraBold";
-          position = "0, -500";
+          position = "0, -300";
           halign = "center";
           valign = "top";
           shadow_passes = 1;
