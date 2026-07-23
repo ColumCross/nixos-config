@@ -881,5 +881,15 @@
 
     # GTK4 theme for hyprKCS
     #"gtk-4.0/gtk.css".source = ./gtk-4.0/gtk.css;
+
+    # OpenCode TUI config
+    "opencode/tui.json".text = builtins.toJSON {
+      "$schema" = "https://opencode.ai/tui.json";
+      attention = {
+        enabled = true;
+        notifications = true;
+        sound = true;
+      };
+    };
   };
 }
