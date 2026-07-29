@@ -1,0 +1,6 @@
+window { background-color: #ffffff; color: #282a36; font-family: 'JetBrainsMono Nerd Font', monospace; font-size: 13px; }
+label { color: #282a36; } titlebar, headerbar { background-color: #ffffff; color: #282a36; border-bottom: 2px solid #282a36; }
+button { background-color: transparent; color: #282a36; border: 1px solid #282a36; border-radius: 0; padding: 4px 12px; }
+button:hover { background-color: rgba(40, 42, 54, 0.1); } entry { color: #282a36; border: 1px solid rgba(40, 42, 54, 0.2); }
+list, row { background-color: #ffffff; color: #282a36; } row:selected, row:hover { background-color: rgba(40, 42, 54, 0.1); }
+tooltip, popover, dialog { background-color: #ffffff; color: #282a36; border: 1px solid #282a36; }

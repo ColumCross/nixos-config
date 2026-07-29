@@ -1,0 +1,7 @@
+* { background: #ffffff; foreground: #282a36; selected-foreground: #0077aa; border-color: #0077aa; background-color: transparent; text-color: @foreground; }
+window { background-color: @background; border: 2px; border-color: @border-color; width: 960px; height: 540px; padding: 10px; }
+mainbox { children: [inputbar, listview]; background-color: transparent; }
+inputbar { children: [prompt, entry]; border: 0px 0px 2px 0px; border-color: @border-color; padding: 10px; }
+listview { lines: 10; columns: 1; scrollbar: false; }
+element { padding: 8px; } element selected { text-color: @selected-foreground; border: 2px; border-color: @selected-foreground; }
+element-text { background-color: transparent; text-color: inherit; } element-icon { size: 24px; }

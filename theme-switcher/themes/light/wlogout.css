@@ -1,0 +1,4 @@
+* { background-image: none; box-shadow: none; }
+window { background-color: rgba(248, 248, 242, 0.95); color: #282a36; }
+button { background-color: #eaecee; color: #282a36; border: 1px solid #0077aa; border-radius: 0; margin: 5px; padding: 10px 30px; }
+button:hover, button:focus { background-color: rgba(0, 119, 170, 0.15); color: #0077aa; }

@@ -1,0 +1,19 @@
+@define-color teal #00ffff;
+@define-color green #00ff9f;
+@define-color pink #ff33cc;
+@define-color red #ff0080;
+@define-color orange #ff4d00;
+@define-color yellow #ffff00;
+@define-color purple #bd00ff;
+@define-color blue #00b8ff;
+@define-color grey #888888;
+@define-color black #000000;
+@define-color black-gradient #0a0a0a;
+* { font-family: 'JetBrainsMono Nerd Font', 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; }
+window#waybar { background: linear-gradient(180deg, @black 0%, @black-gradient 100%); border-bottom: 2px solid @teal; box-shadow: 0 0 20px @teal; color: @teal; }
+button { border: none; border-radius: 4px; background: rgba(0, 255, 255, 0.1); color: @teal; }
+button:hover { background: rgba(0, 255, 255, 0.2); box-shadow: 0 0 15px @teal; }
+#workspaces button { padding: 4px 8px; margin: 0 4px; background: transparent; color: @teal; }
+#workspaces button.focused { font-weight: bold; }
+#clock, #battery, #cpu, #memory, #backlight, #disk, #network, #bluetooth, #pulseaudio, #wireplumber, #custom-media, #tray, #mode, #scratchpad { padding: 1px 12px; color: @teal; }
+#memory { color: @purple; } #disk { color: @orange; } #backlight { color: @yellow; } #battery { color: @green; } #pulseaudio { color: #00ffd5; } #custom-power { color: @red; padding: 1px 12px; }

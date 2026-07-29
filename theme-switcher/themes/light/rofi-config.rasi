@@ -1,0 +1,6 @@
+configuration {
+  display-drun: "Apps";
+  drun-display-format: "{name}";
+  font: "JetBrains Mono 12";
+}
+@theme "~/.config/theme-switcher/themes/light/rofi-theme.rasi"
