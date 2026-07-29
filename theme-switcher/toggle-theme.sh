@@ -33,7 +33,9 @@ apply_theme() {
 
   if [ -e "$HOME/.config/waybar/theme-$theme.css" ]; then
     ln -sfn "$HOME/.config/waybar/theme-$theme.css" "$HOME/.config/waybar/style.css"
-    command -v pkill >/dev/null 2>&1 && pkill -SIGUSR2 waybar 2>/dev/null || true
+    if command -v pkill >/dev/null 2>&1; then
+      pkill -SIGUSR2 waybar 2>/dev/null || true
+    fi
   fi
 
   if [ "$theme" = light ] && [ -f "$theme_dir/dunst.conf" ]; then
@@ -42,7 +44,9 @@ apply_theme() {
   else
     rm -f "$HOME/.config/dunst/dunstrc.d/10-theme.conf"
   fi
-  command -v dunstctl >/dev/null 2>&1 && dunstctl reload 2>/dev/null || true
+  if command -v dunstctl >/dev/null 2>&1; then
+    dunstctl reload 2>/dev/null || true
+  fi
 
   ln -sfn "$HOME/.config/rofi/config-$theme.rasi" "$HOME/.config/rofi/config.rasi"
   ln -sfn "$theme_dir/gtk.css" "$HOME/.config/gtk-4.0/gtk.css"
