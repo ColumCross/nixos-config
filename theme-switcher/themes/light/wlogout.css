@@ -2,3 +2,6 @@
 window { background-color: rgba(248, 248, 242, 0.95); color: #282a36; }
 button { background-color: #eaecee; color: #282a36; border: 1px solid #0077aa; border-radius: 0; margin: 5px; padding: 10px 30px; }
 button:hover, button:focus { background-color: rgba(0, 119, 170, 0.15); color: #0077aa; }
+#lock { background-image: image(url("@WLOGOUT_ICONS@/lock.png")); } #logout { background-image: image(url("@WLOGOUT_ICONS@/logout.png")); }
+#suspend { background-image: image(url("@WLOGOUT_ICONS@/suspend.png")); } #hibernate { background-image: image(url("@WLOGOUT_ICONS@/hibernate.png")); }
+#shutdown { background-image: image(url("@WLOGOUT_ICONS@/shutdown.png")); } #reboot { background-image: image(url("@WLOGOUT_ICONS@/reboot.png")); }
