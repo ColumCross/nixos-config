@@ -144,6 +144,7 @@
     spotify-player
     blueman
     wlogout
+    adwaita-icon-theme
 
   ];
 
