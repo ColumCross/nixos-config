@@ -998,6 +998,7 @@ in
         "center,class:^(blueman-manager)$"
         "float,class:^(hyprkcs)$"
         "center,class:^(hyprkcs)$"
+        "size 889 854, class:^(hyprkcs)$"
         "rounding 5, class:^(kitty)$"
         "suppressevent fullscreen, class:^(kitty)$"
       ];
