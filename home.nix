@@ -925,7 +925,7 @@ in
 
       bind = [
         "$mainMod, T, exec, $terminal"
-        "$mainMod, S, exec, $menu"
+        "$mainMod, SPACE, exec, $menu"
         "$mainMod, D, exec, discord"
         "$mainMod, Q, killactive,"
         "$mainMod SHIFT, Q, exit,"
