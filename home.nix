@@ -275,19 +275,19 @@ let
 
   dunst-light-overrides = ''
     [global]
-    frame_color = #d8dee9
+    frame_color = "#d8dee9"
 
     [urgency_low]
-    background = #d8dee9
-    foreground = #2e3440
+    background = "#d8dee9"
+    foreground = "#2e3440"
 
     [urgency_normal]
-    background = #e5e9f0
-    foreground = #2e3440
+    background = "#e5e9f0"
+    foreground = "#2e3440"
 
     [urgency_critical]
-    background = #bf616a
-    foreground = #eceff4
+    background = "#bf616a"
+    foreground = "#eceff4"
   '';
 
   rofi-dark-config = ''
@@ -919,7 +919,6 @@ in
         "waybar"
         "hyprpaper"
         "hypridle"
-        "dunst"
         "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
         "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
       ];
@@ -1327,7 +1326,7 @@ in
         separator_color = "frame";
         font = "JetBrains Mono 10";
         markup = "full";
-        format = "<b>%s</b>\n%b";
+        format = "<b>%s</b>\\n%b";
         alignment = "left";
         vertical_alignment = "center";
         show_age_threshold = 60;
@@ -1365,6 +1364,14 @@ in
         foreground = "#eceff4";
         timeout = 0;
       };
+    };
+  };
+
+  systemd.user.services.dunst = {
+    Install.WantedBy = [ "graphical-session.target" ];
+    Service = {
+      Restart = "on-failure";
+      RestartSec = 2;
     };
   };
 
