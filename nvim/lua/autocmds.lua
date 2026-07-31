@@ -3,6 +3,11 @@ require "nvchad.autocmds"
 local uv = vim.uv or vim.loop
 local theme_file = vim.fn.expand("~/.cache/current-theme")
 local last_theme = nil
+local dark_overrides = {
+  Normal = { bg = "#000000" },
+  NormalNC = { bg = "#000000" },
+  NormalFloat = { bg = "#000000" },
+}
 
 local function check_theme()
   local f = io.open(theme_file, "r")
@@ -13,10 +18,11 @@ local function check_theme()
       last_theme = theme
       local nvim_theme = theme == "light" and "github_light" or "onedark"
 
-      local nvconfig = require "nvconfig"
-      nvconfig.base46.theme = nvim_theme
+       local nvconfig = require "nvconfig"
+       nvconfig.base46.theme = nvim_theme
+       nvconfig.base46.hl_override = theme == "dark" and dark_overrides or {}
 
-      local base46 = require "base46"
+       local base46 = require "base46"
       base46.load_all_highlights()
     end
   end

@@ -134,6 +134,7 @@
     gh
     sl
     fastfetch
+    md-tui
 
     # Desktop utilities
     rofi

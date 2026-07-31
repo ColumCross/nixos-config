@@ -708,6 +708,34 @@ let
     notify-send "Theme" "Switched to $NEW mode"
   '';
 
+  brightness-adjust = pkgs.writeShellScriptBin "brightness-adjust" ''
+    CURRENT=$(${pkgs.brightnessctl}/bin/brightnessctl -m info \
+      | ${pkgs.coreutils}/bin/cut -d, -f4 \
+      | ${pkgs.coreutils}/bin/tr -d '%')
+
+    case "$1" in
+      up)
+        if [ "$CURRENT" -lt 5 ]; then
+          STEP=1
+        else
+          STEP=5
+        fi
+        ${pkgs.brightnessctl}/bin/brightnessctl set "$STEP%+"
+        ;;
+      down)
+        if [ "$CURRENT" -le 5 ]; then
+          STEP=1
+        else
+          STEP=5
+        fi
+        ${pkgs.brightnessctl}/bin/brightnessctl set "$STEP%-"
+        ;;
+      *)
+        exit 2
+        ;;
+    esac
+  '';
+
 in
 {
   home.username = "colum";
@@ -724,6 +752,7 @@ in
   home.packages = [
     pkgs.networkmanager_dmenu
     toggle-theme
+    brightness-adjust
     (pkgs.writeShellScriptBin "rebuild-nixos" ''
       sudo nixos-rebuild switch --flake /etc/nixos#laptop --impure
       echo ""
@@ -976,8 +1005,8 @@ in
 
         ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
         ", XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
-        ", XF86MonBrightnessUp, exec, brightnessctl set 5%+"
-        ", XF86MonBrightnessDown, exec, brightnessctl set 5%-"
+        ", XF86MonBrightnessUp, exec, brightness-adjust up"
+        ", XF86MonBrightnessDown, exec, brightness-adjust down"
 
         # Media player
         ", XF86AudioPlay, exec, playerctl play-pause"
