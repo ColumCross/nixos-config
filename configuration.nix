@@ -131,6 +131,7 @@
     kalker
     gh
     sl
+    fastfetch
 
     # Desktop utilities
     rofi
