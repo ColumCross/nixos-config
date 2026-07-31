@@ -804,7 +804,6 @@ in
         follow_mouse = 1;
         touchpad = {
           natural_scroll = true;
-          left_handed = true;
           scroll_factor = 0.5;
         };
       };
