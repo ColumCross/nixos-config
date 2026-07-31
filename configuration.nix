@@ -128,6 +128,9 @@
   	gnumake
   	unzip
   	wl-clipboard
+    kalker
+    gh
+    sl
 
     # Desktop utilities
     rofi
