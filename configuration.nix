@@ -1,7 +1,7 @@
 # =========================
 # configuration.nix
 # =========================
-{ config, pkgs, ... }:
+{ config, pkgs, unstablePkgs, ... }:
 
 {
   imports = [
@@ -148,10 +148,11 @@
     hyprlock
     dunst
     libnotify
-    spotify-player
+    unstablePkgs.spotify-player
     blueman
     wlogout
     adwaita-icon-theme
+    kdePackages.dolphin
 
   ];
 

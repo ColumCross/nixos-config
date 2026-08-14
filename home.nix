@@ -708,14 +708,18 @@ let
     notify-send "Theme" "Switched to $NEW mode"
   '';
 
+  # Brightness adjustment logic
+  # Brightness buttons increase or decrease in different increments if above or below a cutoff point
   brightness-adjust = pkgs.writeShellScriptBin "brightness-adjust" ''
     CURRENT=$(${pkgs.brightnessctl}/bin/brightnessctl -m info \
       | ${pkgs.coreutils}/bin/cut -d, -f4 \
       | ${pkgs.coreutils}/bin/tr -d '%')
 
+    BRIGHTNESS_CUTOFF=10
+
     case "$1" in
       up)
-        if [ "$CURRENT" -lt 5 ]; then
+        if [ "$CURRENT" -lt $BRIGHTNESS_CUTOFF ]; then
           STEP=1
         else
           STEP=5
@@ -723,7 +727,7 @@ let
         ${pkgs.brightnessctl}/bin/brightnessctl set "$STEP%+"
         ;;
       down)
-        if [ "$CURRENT" -le 5 ]; then
+        if [ "$CURRENT" -le $BRIGHTNESS_CUTOFF ]; then
           STEP=1
         else
           STEP=5
