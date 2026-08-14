@@ -8,8 +8,8 @@ let
   # Theme definitions
   # ==========================================
 
-  dark-wallpaper = ./wallpapers/dark_wallpaper.jpg;
-  light-wallpaper = ./wallpapers/light_wallpaper.jpg;
+  dark-wallpaper = ./wallpapers/nix-dark.png;
+  light-wallpaper = ./wallpapers/nix-bright.png;
 
   waybar-dark-css = ''
     @define-color teal #00ffff;

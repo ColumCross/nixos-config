@@ -28,7 +28,8 @@
   ## Time
   #################################
 
-  time.timeZone = "Europe/Berlin";
+  #time.timeZone = "Europe/Berlin";
+  time.timeZone = "America/New_York";
 
   #################################
   ## Locale
