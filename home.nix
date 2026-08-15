@@ -66,7 +66,7 @@ let
       border: none;
     }
     #workspaces button:hover { color: @teal; }
-    #workspaces button.focused { color: @teal; font-weight: bold; }
+    #workspaces button.active { color: #B91C1C; font-weight: bold; }
     #workspaces button.urgent { color: @pink; }
 
     #clock, #battery, #cpu, #memory, #backlight, #disk, #network,
@@ -197,7 +197,7 @@ let
       border: none;
     }
     #workspaces button:hover { color: @teal; }
-    #workspaces button.focused { color: @teal; font-weight: bold; }
+    #workspaces button.active { color: #B91C1C; font-weight: bold; }
     #workspaces button.urgent { color: @pink; }
 
     #clock, #battery, #cpu, #memory, #backlight, #disk, #network,
@@ -627,11 +627,11 @@ let
 
     # Hyprland border colors
     if [ "$NEW" = "dark" ]; then
-      hyprctl keyword general:col.active_border "rgba(33ccffee) rgba(00ff99ee) 45deg"
-      hyprctl keyword general:col.inactive_border "rgba(00FFFFEE)"
+      hyprctl keyword general:col.active_border "rgba(11d424ff) rgba(0e8a1aff) 45deg"
+      hyprctl keyword general:col.inactive_border "rgba(00ffffff) rgba(0055ffff) 45deg"
     else
-      hyprctl keyword general:col.active_border "rgba(6272a4ee) rgba(50fa7bee) 45deg"
-      hyprctl keyword general:col.inactive_border "rgba(d8dee9EE)"
+      hyprctl keyword general:col.active_border "rgba(11d424ff) rgba(0e8a1aff) 45deg"
+      hyprctl keyword general:col.inactive_border "rgba(00ffffff) rgba(0055ffff) 45deg"
     fi
 
     # Wallpaper
@@ -845,8 +845,8 @@ in
         gaps_in = 2;
         gaps_out = 5;
         border_size = 2;
-        "col.active_border" = "rgba(33ccffee) rgba(00ff99ee) 45deg";
-        "col.inactive_border" = "rgba(00FFFFEE)";
+        "col.active_border" = "rgba(11d424ff) rgba(0e8a1aff) 45deg";
+        "col.inactive_border" = "rgba(00ffffff) rgba(0055ffff) 45deg";
         resize_on_border = false;
         allow_tearing = false;
         layout = "dwindle";
@@ -1221,7 +1221,7 @@ in
         border: none;
       }
       #workspaces button:hover { color: @teal; }
-      #workspaces button.focused { color: @teal; font-weight: bold; }
+      #workspaces button.active { color: #B91C1C; font-weight: bold; }
       #workspaces button.urgent { color: @pink; }
 
       #clock, #battery, #cpu, #memory, #backlight, #disk, #network,

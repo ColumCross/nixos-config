@@ -136,6 +136,7 @@
     sl
     fastfetch
     md-tui
+    btop
 
     # Desktop utilities
     rofi
