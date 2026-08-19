@@ -13,6 +13,15 @@ let
   dark-wallpaper = ./wallpapers/nix-dark.png;
   light-wallpaper = ./wallpapers/nix-bright.png;
 
+  waybarHeight = 48;
+  waybarFontSize = "26px";
+  waybarBorderWidth = "4px";
+  waybarButtonRadius = "8px";
+  waybarModuleVerticalPadding = "2px";
+  waybarWorkspaceVerticalPadding = "8px";
+  waybarClockLetterSpacing = "2px";
+  waybarTrayIconSize = 32;
+
   waybar-dark-css = ''
     @define-color teal #00ffff;
     @define-color teal-dim #00cccc;
@@ -31,14 +40,14 @@ let
 
     * {
       font-family: 'JetBrainsMono Nerd Font', 'JetBrains Mono', 'Noto Sans Mono', 'Font Awesome 6 Free', 'Font Awesome 6 Brands', monospace;
-      font-size: 13px;
+      font-size: ${waybarFontSize};
       font-weight: 500;
     }
 
     window#waybar {
       background: linear-gradient(180deg, @black 0%, @black-gradient 100%);
-      border-bottom: 2px solid @teal;
-      box-shadow: 0 0 20px @teal;
+      border-bottom: ${waybarBorderWidth} solid @teal;
+      box-shadow: 0 0 40px @teal;
       color: @teal;
       transition-property: background-color, border-color, box-shadow;
       transition-duration: 0.3s;
@@ -47,21 +56,21 @@ let
 
     window#waybar.hidden { opacity: 0.2; }
     window#waybar.empty { background-color: transparent; }
-    window#waybar.solo { background-color: @black; border: 2px solid @teal; }
+    window#waybar.solo { background-color: @black; border: ${waybarBorderWidth} solid @teal; }
 
     button {
       border: none;
-      border-radius: 4px;
+      border-radius: ${waybarButtonRadius};
       background: rgba(0, 255, 255, 0.1);
       color: @teal;
     }
     button:hover {
       background: rgba(0, 255, 255, 0.2);
-      box-shadow: 0 0 15px @teal;
+      box-shadow: 0 0 30px @teal;
     }
 
     #workspaces button {
-      padding: 4px 8px;
+      padding: ${waybarWorkspaceVerticalPadding} 8px;
       margin: 0 4px;
       background: transparent;
       color: @teal-dim;
@@ -75,7 +84,7 @@ let
     #bluetooth, #pulseaudio, #wireplumber, #custom-media, #tray,
     #mode, #scratchpad, #power-profiles-daemon, #mpd, #language,
     #keyboard-state, #privacy-item {
-      padding: 1px 12px;
+      padding: ${waybarModuleVerticalPadding} 12px;
       margin: 0;
       background: transparent;
       border: none;
@@ -94,12 +103,12 @@ let
 
     #custom-power {
       color: @red;
-      padding: 1px 12px;
+      padding: ${waybarModuleVerticalPadding} 12px;
       margin: 0;
     }
     #custom-power:hover {
       color: @pink;
-      text-shadow: 0 0 10px @pink;
+      text-shadow: 0 0 20px @pink;
     }
 
     #cpu { color: @teal; }
@@ -124,7 +133,7 @@ let
     #mpd.disconnected { color: @red; }
     #mpd.stopped { color: @grey; }
     #mpd.paused { color: @gold; }
-    #clock { font-weight: bold; letter-spacing: 1px; color: @teal-light; }
+    #clock { font-weight: bold; letter-spacing: ${waybarClockLetterSpacing}; color: @teal-light; }
     #temperature.critical { color: @red; }
     #custom-weather { color: @blue; }
     #tray { color: @teal; }
@@ -162,14 +171,14 @@ let
 
     * {
       font-family: 'JetBrainsMono Nerd Font', 'JetBrains Mono', 'Noto Sans Mono', 'Font Awesome 6 Free', 'Font Awesome 6 Brands', monospace;
-      font-size: 13px;
+      font-size: ${waybarFontSize};
       font-weight: 500;
     }
 
     window#waybar {
       background: linear-gradient(180deg, @black 0%, @black-gradient 100%);
-      border-bottom: 2px solid @teal;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      border-bottom: ${waybarBorderWidth} solid @teal;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
       color: @teal;
       transition-property: background-color, border-color, box-shadow;
       transition-duration: 0.3s;
@@ -178,21 +187,21 @@ let
 
     window#waybar.hidden { opacity: 0.2; }
     window#waybar.empty { background-color: transparent; }
-    window#waybar.solo { background-color: @black; border: 2px solid @teal; }
+    window#waybar.solo { background-color: @black; border: ${waybarBorderWidth} solid @teal; }
 
     button {
       border: none;
-      border-radius: 4px;
+      border-radius: ${waybarButtonRadius};
       background: rgba(0, 119, 170, 0.1);
       color: @teal;
     }
     button:hover {
       background: rgba(0, 119, 170, 0.2);
-      box-shadow: 0 0 8px rgba(0, 119, 170, 0.3);
+      box-shadow: 0 0 16px rgba(0, 119, 170, 0.3);
     }
 
     #workspaces button {
-      padding: 4px 8px;
+      padding: ${waybarWorkspaceVerticalPadding} 8px;
       margin: 0 4px;
       background: transparent;
       color: @teal-dim;
@@ -206,7 +215,7 @@ let
     #bluetooth, #pulseaudio, #wireplumber, #custom-media, #tray,
     #mode, #scratchpad, #power-profiles-daemon, #mpd, #language,
     #keyboard-state, #privacy-item {
-      padding: 1px 12px;
+      padding: ${waybarModuleVerticalPadding} 12px;
       margin: 0;
       background: transparent;
       border: none;
@@ -225,12 +234,12 @@ let
 
     #custom-power {
       color: @red;
-      padding: 1px 12px;
+      padding: ${waybarModuleVerticalPadding} 12px;
       margin: 0;
     }
     #custom-power:hover {
       color: @pink;
-      text-shadow: 0 0 8px @pink;
+      text-shadow: 0 0 16px @pink;
     }
 
     #cpu { color: @teal; }
@@ -255,7 +264,7 @@ let
     #mpd.disconnected { color: @red; }
     #mpd.stopped { color: @grey; }
     #mpd.paused { color: @gold; }
-    #clock { font-weight: bold; letter-spacing: 1px; color: @teal-light; }
+    #clock { font-weight: bold; letter-spacing: ${waybarClockLetterSpacing}; color: @teal-light; }
     #temperature.critical { color: @red; }
     #custom-weather { color: @blue; }
     #tray { color: @teal; }
@@ -837,7 +846,7 @@ in
       "$menu" = "rofi -show drun";
       "$fileManager" = "dolphin";
 
-      monitor = ",preferred,auto,1.2";
+      monitor = ",preferred,auto,1";
 
       env = [
         "XCURSOR_SIZE,24"
@@ -1061,7 +1070,7 @@ in
       mainBar = {
         layer = "top";
         position = "top";
-        height = 24;
+        height = waybarHeight;
         spacing = 2;
 
         modules-left = [ "hyprland/workspaces" ];
@@ -1160,7 +1169,7 @@ in
         };
 
         tray = {
-          icon-size = 16;
+          icon-size = waybarTrayIconSize;
           spacing = 8;
         };
 
@@ -1178,136 +1187,7 @@ in
         };
       };
     };
-    style = ''
-      @define-color teal #00ffff;
-      @define-color teal-dim #00cccc;
-      @define-color teal-light #00ffd5;
-      @define-color green #00ff9f;
-      @define-color pink #ff33cc;
-      @define-color red #ff0080;
-      @define-color orange #ff4d00;
-      @define-color yellow #ffff00;
-      @define-color purple #bd00ff;
-      @define-color blue #00b8ff;
-      @define-color grey #888888;
-      @define-color gold #ffcc00;
-      @define-color black #000000;
-      @define-color black-gradient #0a0a0a;
-
-      * {
-        font-family: 'JetBrainsMono Nerd Font', 'JetBrains Mono', 'Noto Sans Mono', 'Font Awesome 6 Free', 'Font Awesome 6 Brands', monospace;
-        font-size: 13px;
-        font-weight: 500;
-      }
-
-      window#waybar {
-        background: linear-gradient(180deg, @black 0%, @black-gradient 100%);
-        border-bottom: 2px solid @teal;
-        box-shadow: 0 0 20px @teal;
-        color: @teal;
-        transition-property: background-color, border-color, box-shadow;
-        transition-duration: 0.3s;
-        border-radius: 0 0;
-      }
-
-      window#waybar.hidden { opacity: 0.2; }
-      window#waybar.empty { background-color: transparent; }
-      window#waybar.solo { background-color: @black; border: 2px solid @teal; }
-
-      button {
-        border: none;
-        border-radius: 4px;
-        background: rgba(0, 255, 255, 0.1);
-        color: @teal;
-      }
-      button:hover {
-        background: rgba(0, 255, 255, 0.2);
-        box-shadow: 0 0 15px @teal;
-      }
-
-      #workspaces button {
-        padding: 4px 8px;
-        margin: 0 4px;
-        background: transparent;
-        color: @teal-dim;
-        border: none;
-      }
-      #workspaces button:hover { color: @teal; }
-      #workspaces button.active { color: #B91C1C; font-weight: bold; }
-      #workspaces button.urgent { color: @pink; }
-
-      #clock, #battery, #cpu, #memory, #backlight, #disk, #network,
-      #bluetooth, #pulseaudio, #wireplumber, #custom-media, #tray,
-      #mode, #scratchpad, #power-profiles-daemon, #mpd, #language,
-      #keyboard-state, #privacy-item {
-        padding: 1px 12px;
-        margin: 0;
-        background: transparent;
-        border: none;
-        color: @teal;
-      }
-
-      #window, #workspaces { margin: 0 4px; }
-
-      #custom-sep1, #custom-sep2, #custom-sep3, #custom-sep4,
-      #custom-sep5, #custom-sep6, #custom-sep7 {
-        color: @teal;
-        opacity: 0.4;
-        padding: 0 4px;
-        margin: 0;
-      }
-
-      #custom-power {
-        color: @red;
-        padding: 1px 12px;
-        margin: 0;
-      }
-      #custom-power:hover {
-        color: @pink;
-        text-shadow: 0 0 10px @pink;
-      }
-
-      #cpu { color: @teal; }
-      #memory { color: @purple; }
-      #disk { color: @orange; }
-      #backlight { color: @yellow; }
-      #battery { color: @green; }
-      #battery.charging, #battery.plugged { color: @green; }
-      #battery.critical:not(.charging) { color: @red; }
-      #battery.warning:not(.charging) { color: @orange; }
-      #network { color: @teal; }
-      #network.disconnected { color: @red; }
-      #bluetooth { color: @teal; }
-      #bluetooth.connected { color: @green; }
-      #bluetooth.off, #bluetooth.disabled { color: @red; }
-      #pulseaudio { color: @teal-light; }
-      #pulseaudio.muted { color: @grey; }
-      #wireplumber { color: @pink; }
-      #wireplumber.muted { color: @red; }
-      #custom-media { color: @green; }
-      #mpd { color: @green; }
-      #mpd.disconnected { color: @red; }
-      #mpd.stopped { color: @grey; }
-      #mpd.paused { color: @gold; }
-      #clock { font-weight: bold; letter-spacing: 1px; color: @teal-light; }
-      #temperature.critical { color: @red; }
-      #custom-weather { color: @blue; }
-      #tray { color: @teal; }
-      #tray > .passive { opacity: 0.5; }
-      #tray > .needs-attention { color: @pink; }
-      #idle_inhibitor { color: @teal; }
-      #idle_inhibitor.activated { color: @green; }
-      #language { min-width: 16px; padding: 4px 8px; }
-      #keyboard-state { color: @teal-light; padding: 4px 0px; min-width: 16px; }
-      #keyboard-state > label.locked { color: @pink; }
-      #scratchpad { color: @teal; }
-      #scratchpad.empty { color: rgba(0, 255, 255, 0.3); }
-      #mode { color: @pink; font-weight: bold; }
-      #privacy { padding: 0; }
-      #privacy-item.screenshare { color: @orange; }
-      #privacy-item.audio-in { color: @green; }
-      #privacy-item.audio-out { color: @teal; }
-    '';
+    style = waybar-dark-css;
   };
 
   # ==========================================
