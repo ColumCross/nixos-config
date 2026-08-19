@@ -1,7 +1,7 @@
 # =========================
 # configuration.nix
 # =========================
-{ config, pkgs, unstablePkgs, ... }:
+{ config, pkgs, profile, unstablePkgs, ... }:
 
 {
   imports = [
@@ -21,7 +21,7 @@
   ## Networking
   #################################
 
-  networking.hostName = "nixos";
+  networking.hostName = profile.hostName;
   networking.networkmanager.enable = true;
 
   #################################
@@ -101,7 +101,7 @@
   ## User
   #################################
 
-  users.users.colum = {
+  users.users.${profile.username} = {
     isNormalUser = true;
 
     extraGroups = [
@@ -161,7 +161,7 @@
 
   # NordVPN configuration
   custom.services.nordvpn.enable = true;
-  users.groups.nordvpn.members = ["colum"];
+  users.groups.nordvpn.members = [profile.username];
 
   #################################
   ## Fonts

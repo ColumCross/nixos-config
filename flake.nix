@@ -2,7 +2,7 @@
 # flake.nix
 # =========================
 {
-  description = "Colum's NixOS configuration";
+  description = "Reusable NixOS and Home Manager configuration";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
@@ -31,18 +31,25 @@
   }:
   let
     system = "x86_64-linux";
+    profile = rec {
+      username = "colum";
+      homeDirectory = "/home/${username}";
+      hostName = "nixos";
+      flakeName = "laptop";
+      configDirectory = "/etc/nixos";
+    };
     unstablePkgs = import nixpkgs-unstable {
       inherit system;
       config.allowUnfree = true;
     };
   in {
-    nixosConfigurations.laptop = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.${profile.flakeName} = nixpkgs.lib.nixosSystem {
       inherit system;
 
-      specialArgs = { inherit unstablePkgs; };
+      specialArgs = { inherit profile unstablePkgs; };
 
 	pkgs = import nixpkgs {
-		system = "x86_64-linux";
+		inherit system;
 		config.allowUnfree = true;
 	};
 
@@ -63,8 +70,9 @@
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.backupFileExtension = "backup";
+          home-manager.extraSpecialArgs = { inherit profile; };
 
-          home-manager.users.colum = import ./home.nix;
+          home-manager.users.${profile.username} = import ./home.nix;
         }
       ];
     };

@@ -1,9 +1,11 @@
 # =========================
 # home.nix
 # =========================
-{ config, pkgs, ... }:
+{ config, pkgs, profile, ... }:
 
 let
+  flakeReference = "${profile.configDirectory}#${profile.flakeName}";
+
   # ==========================================
   # Theme definitions
   # ==========================================
@@ -747,8 +749,8 @@ let
 
 in
 {
-  home.username = "colum";
-  home.homeDirectory = "/home/colum";
+  home.username = profile.username;
+  home.homeDirectory = profile.homeDirectory;
 
   home.stateVersion = "25.05";
 
@@ -763,17 +765,17 @@ in
     toggle-theme
     brightness-adjust
     (pkgs.writeShellScriptBin "rebuild-nixos" ''
-      sudo nixos-rebuild switch --flake /etc/nixos#laptop --impure
+      sudo nixos-rebuild switch --flake ${flakeReference} --impure
       echo ""
       echo "Press any key to close..."
       read -n 1
     '')
     (pkgs.writeShellScriptBin "opencode-nixos" ''
-      cd /etc/nixos
+      cd "${profile.configDirectory}"
       exec opencode
     '')
     (pkgs.writeShellScriptBin "nvim-nixos" ''
-      cd /etc/nixos
+      cd "${profile.configDirectory}"
       exec nvim .
     '')
   ];
@@ -813,8 +815,8 @@ in
   programs.bash = {
     enable = true;
     shellAliases = {
-      rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#laptop --impure";
-      update = "sudo nixos-rebuild switch --flake /etc/nixos#laptop --impure --upgrade";
+      rebuild = "sudo nixos-rebuild switch --flake ${flakeReference} --impure";
+      update = "sudo nixos-rebuild switch --flake ${flakeReference} --impure --upgrade";
       gco = "git checkout";
       gs = "git status";
       gl = "git log --oneline -10";
