@@ -155,6 +155,7 @@
     wlogout
     adwaita-icon-theme
     kdePackages.dolphin
+    easyeffects
 
   ];
 

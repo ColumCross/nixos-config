@@ -520,6 +520,11 @@ let
 
   wlogout-icons = "${pkgs.wlogout}/share/wlogout/icons";
 
+  rabcor-hb-mid = pkgs.fetchurl {
+    url = "https://raw.githubusercontent.com/Rabcor/Heavy-Bass-EE/3d5471a728eded83b165905a92cd959415eda1f4/HB-Mid.json";
+    hash = "sha256-0eIReSFJKQNWiG/mUmmgC8od9TCWckIrMnH/9Y55cgA=";
+  };
+
   wlogout-dark-css = ''
     * {
       background-image: none;
@@ -774,6 +779,11 @@ in
   ];
 
   programs.home-manager.enable = true;
+
+  services.easyeffects = {
+    enable = true;
+    preset = "HB-Mid";
+  };
 
   programs.git = {
     enable = true;
@@ -1704,5 +1714,7 @@ in
         sound = true;
       };
     };
+
+    "easyeffects/output/HB-Mid.json".source = rabcor-hb-mid;
   };
 }
