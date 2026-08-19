@@ -13,14 +13,14 @@ let
   dark-wallpaper = ./wallpapers/nix-dark.png;
   light-wallpaper = ./wallpapers/nix-bright.png;
 
-  waybarHeight = 48;
-  waybarFontSize = "26px";
-  waybarBorderWidth = "4px";
-  waybarButtonRadius = "8px";
-  waybarModuleVerticalPadding = "2px";
-  waybarWorkspaceVerticalPadding = "8px";
-  waybarClockLetterSpacing = "2px";
-  waybarTrayIconSize = 32;
+  waybarHeight = 30;
+  waybarFontSize = "16.25px";
+  waybarBorderWidth = "2px";
+  waybarButtonRadius = "5px";
+  waybarModuleVerticalPadding = "1.25px";
+  waybarWorkspaceVerticalPadding = "5px";
+  waybarClockLetterSpacing = "1.25px";
+  waybarTrayIconSize = 20;
 
   waybar-dark-css = ''
     @define-color teal #00ffff;
@@ -47,7 +47,7 @@ let
     window#waybar {
       background: linear-gradient(180deg, @black 0%, @black-gradient 100%);
       border-bottom: ${waybarBorderWidth} solid @teal;
-      box-shadow: 0 0 40px @teal;
+      box-shadow: 0 0 25px @teal;
       color: @teal;
       transition-property: background-color, border-color, box-shadow;
       transition-duration: 0.3s;
@@ -66,7 +66,7 @@ let
     }
     button:hover {
       background: rgba(0, 255, 255, 0.2);
-      box-shadow: 0 0 30px @teal;
+      box-shadow: 0 0 18.75px @teal;
     }
 
     #workspaces button {
@@ -108,7 +108,7 @@ let
     }
     #custom-power:hover {
       color: @pink;
-      text-shadow: 0 0 20px @pink;
+      text-shadow: 0 0 12.5px @pink;
     }
 
     #cpu { color: @teal; }
@@ -178,7 +178,7 @@ let
     window#waybar {
       background: linear-gradient(180deg, @black 0%, @black-gradient 100%);
       border-bottom: ${waybarBorderWidth} solid @teal;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 2.5px 10px rgba(0, 0, 0, 0.15);
       color: @teal;
       transition-property: background-color, border-color, box-shadow;
       transition-duration: 0.3s;
@@ -197,7 +197,7 @@ let
     }
     button:hover {
       background: rgba(0, 119, 170, 0.2);
-      box-shadow: 0 0 16px rgba(0, 119, 170, 0.3);
+      box-shadow: 0 0 10px rgba(0, 119, 170, 0.3);
     }
 
     #workspaces button {
@@ -239,7 +239,7 @@ let
     }
     #custom-power:hover {
       color: @pink;
-      text-shadow: 0 0 16px @pink;
+      text-shadow: 0 0 10px @pink;
     }
 
     #cpu { color: @teal; }
