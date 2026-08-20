@@ -9,6 +9,8 @@
     /etc/nixos-modules/nix_modules/nordvpn-module.nix
   ];
 
+  services.udisks2.enable = true;
+
   #################################
   ## Bootloader
   #################################
@@ -137,6 +139,7 @@
     fastfetch
     md-tui
     btop
+    vlc
 
     # Desktop utilities
     rofi
