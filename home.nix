@@ -774,7 +774,7 @@ in
     toggle-theme
     brightness-adjust
     (pkgs.writeShellScriptBin "rebuild-nixos" ''
-      sudo nixos-rebuild switch --flake ${flakeReference} --impure
+      sudo nixos-rebuild switch --flake "${flakeReference}" --impure
       echo ""
       echo "Press any key to close..."
       read -n 1
@@ -824,8 +824,8 @@ in
   programs.bash = {
     enable = true;
     shellAliases = {
-      rebuild = "sudo nixos-rebuild switch --flake ${flakeReference} --impure";
-      update = "sudo nixos-rebuild switch --flake ${flakeReference} --impure --upgrade";
+      rebuild = "sudo nixos-rebuild switch --flake '${flakeReference}' --impure";
+      update = "sudo nixos-rebuild switch --flake '${flakeReference}' --impure --upgrade";
       gco = "git checkout";
       gs = "git status";
       gl = "git log --oneline -10";
@@ -968,10 +968,10 @@ in
         # Rebuild NixOS
         "$mainMod CTRL SHIFT, R, exec, kitty --class nixos-rebuild -e rebuild-nixos"
 
-        # OpenCode on /etc/nixos
+        # OpenCode in the configured NixOS directory
         "$mainMod CTRL, C, exec, kitty --class opencode -e opencode-nixos"
 
-        # Neovim on /etc/nixos
+        # Neovim in the configured NixOS directory
         "$mainMod CTRL SHIFT, C, exec, kitty --class neovim-edit -e nvim-nixos"
 
         # Applications
