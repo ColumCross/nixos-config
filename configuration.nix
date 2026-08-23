@@ -1,11 +1,10 @@
 # =========================
 # configuration.nix
 # =========================
-{ config, pkgs, profile, unstablePkgs, ... }:
+{ config, pkgs, lib, hostProfile, resolvedUsers, unstablePkgs, ... }:
 
 {
   imports = [
-    ./hardware-configuration.nix
     /etc/nixos-modules/nix_modules/nordvpn-module.nix
   ];
 
@@ -23,7 +22,7 @@
   ## Networking
   #################################
 
-  networking.hostName = profile.hostName;
+  networking.hostName = hostProfile.hostName;
   networking.networkmanager.enable = true;
 
   #################################
@@ -103,17 +102,12 @@
   ## User
   #################################
 
-  users.users.${profile.username} = {
+  users.users = lib.mapAttrs (_username: userProfile: {
+    inherit (userProfile) uid;
     isNormalUser = true;
-
-    extraGroups = [
-      "wheel"
-      "networkmanager"
-      "bluetooth"
-    ];
-
+    extraGroups = userProfile.extraGroups;
     shell = pkgs.bash;
-  };
+  }) resolvedUsers;
 
   #################################
   ## Packages
@@ -164,7 +158,9 @@
 
   # NordVPN configuration
   custom.services.nordvpn.enable = true;
-  users.groups.nordvpn.members = [profile.username];
+  users.groups.nordvpn.members = lib.attrNames (
+    lib.filterAttrs (_username: userProfile: userProfile.nordvpn) resolvedUsers
+  );
 
   #################################
   ## Fonts

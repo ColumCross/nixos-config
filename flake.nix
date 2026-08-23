@@ -30,51 +30,90 @@
     ...
   }:
   let
-    system = "x86_64-linux";
-    profile = rec {
-      username = "colum";
-      homeDirectory = "/home/${username}";
-      hostName = "nixos";
-      flakeName = "laptop";
-      configDirectory = "/etc/nixos";
+    userDefinitions = {
+      colum = import ./users/colum;
+      cottage = import ./users/cottage;
     };
-    unstablePkgs = import nixpkgs-unstable {
-      inherit system;
-      config.allowUnfree = true;
+
+    hostDefinitions = {
+      laptop = import ./hosts/laptop;
+      cottage = import ./hosts/cottage;
     };
-  in {
-    nixosConfigurations.${profile.flakeName} = nixpkgs.lib.nixosSystem {
-      inherit system;
 
-      specialArgs = { inherit profile unstablePkgs; };
+    mkHost = flakeName: hostDefinition:
+      let
+        inherit (hostDefinition) system;
 
-	pkgs = import nixpkgs {
-		inherit system;
-		config.allowUnfree = true;
-	};
+        resolvedUsers = nixpkgs.lib.mapAttrs (
+          username: hostUser:
+          let
+            userDefinition =
+              userDefinitions.${username}
+                or (throw "Host '${flakeName}' references undefined user '${username}'");
+          in
+          userDefinition
+          // hostUser
+          // {
+            inherit username;
+            homeDirectory = "/home/${username}";
+          }
+        ) hostDefinition.users;
 
-  modules = [
-    ({ pkgs, ... }: {
-      environment.systemPackages = [ 
-		    claude-desktop.packages.${pkgs.system}.default
-        opencode.packages.${pkgs.system}.default
-        hyprKCS.packages.${pkgs.system}.default
-        fast.packages.${pkgs.system}.default
-	    ];
-	  })
-        ./configuration.nix
+        hostProfile = {
+          inherit flakeName resolvedUsers;
+          inherit (hostDefinition) hostName;
+          configDirectory = "/etc/nixos";
+        };
 
-        home-manager.nixosModules.home-manager
+        unstablePkgs = import nixpkgs-unstable {
+          inherit system;
+          config.allowUnfree = true;
+        };
+      in
+      nixpkgs.lib.nixosSystem {
+        inherit system;
 
-        {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.backupFileExtension = "backup";
-          home-manager.extraSpecialArgs = { inherit profile; };
+        specialArgs = { inherit hostProfile resolvedUsers unstablePkgs; };
 
-          home-manager.users.${profile.username} = import ./home.nix;
-        }
-      ];
-    };
+        pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
+
+        modules = [
+          hostDefinition.hardwareModule
+          ./configuration.nix
+          home-manager.nixosModules.home-manager
+
+          ({ lib, pkgs, ... }: {
+            environment.systemPackages = [
+              claude-desktop.packages.${pkgs.system}.default
+              opencode.packages.${pkgs.system}.default
+              hyprKCS.packages.${pkgs.system}.default
+              fast.packages.${pkgs.system}.default
+            ];
+
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
+
+            home-manager.users = lib.mapAttrs (
+              username: userProfile: {
+                imports = [ userProfile.homeModule ];
+
+                _module.args.profile = {
+                  inherit username flakeName;
+                  inherit (userProfile) homeDirectory;
+                  inherit (hostDefinition) hostName;
+                  configDirectory = "/etc/nixos";
+                };
+              }
+            ) resolvedUsers;
+          })
+        ];
+      };
+  in
+  {
+    nixosConfigurations = nixpkgs.lib.mapAttrs mkHost hostDefinitions;
   };
 }

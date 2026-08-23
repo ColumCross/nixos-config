@@ -18,35 +18,44 @@ This repository contains my complete NixOS system configuration.
 
 ## Customization
 
-Fork this repository, then edit the `profile` attribute set near the top of
-`flake.nix` before installing:
+The flake keeps reusable user profiles separate from host-specific hardware and
+account selection:
 
-```nix
-profile = rec {
-  username = "your-username";
-  homeDirectory = "/home/${username}";
-  hostName = "your-hostname";
-  flakeName = "laptop";
-  configDirectory = "/etc/nixos";
-};
+```text
+hosts/<flake-name>/
+|-- default.nix
+`-- hardware-configuration.nix
+
+users/<username>/
+|-- default.nix
+|-- home.nix
+|-- nvim/
+`-- wallpapers/
 ```
 
-These values configure the NixOS account, Home Manager account, hostname,
-flake target, and wrapper-script paths. `configDirectory` must be the path to
-the writable configuration checkout on the installed system. The commands
-below use `laptop`; if `flakeName` is changed, set `FLAKE_NAME` to the same
-value.
+A host definition selects users from the reusable user registry and assigns
+their groups and NordVPN access on that host. Selecting a user creates both the
+NixOS account and its Home Manager configuration. A user profile can therefore
+be shared by multiple hosts without sharing passwords or hardware settings.
 
-The default system architecture is `x86_64-linux`, configured by `system` in
-`flake.nix`. Other architectures must change that value and use a matching
-generated hardware configuration.
+`flake.nix` currently exposes two host outputs:
+
+```text
+.#laptop
+.#cottage
+```
+
+The laptop selects `colum`. Cottage selects both `colum` and `cottage`; the two
+users have independent Home Manager source trees. User IDs are declared in
+`users/<username>/default.nix`, while groups are configured per host.
 
 Each computer must use the `hardware-configuration.nix` generated for that
-computer. Do not reuse the included disk UUIDs on another machine.
+computer. Do not reuse disk UUIDs from another host. The cottage hardware file
+is an intentional guard that prevents the output from building until it is
+replaced on the cottage device.
 
-This configuration does not publish a login password. Set the new user's
-password locally during installation or from a root console with
-`passwd your-username`.
+This configuration does not publish login passwords. Set each selected user's
+password locally during installation or from a root console.
 
 The NordVPN module currently imported from
 `/etc/nixos-modules/nix_modules/nordvpn-module.nix` is external to this
@@ -63,41 +72,69 @@ credential helper before authenticating to a Git host.
 
 ## Installation
 
-Partition and mount the disks as normal.
-
-Set the URL of your fork and the `flakeName` selected in `flake.nix`:
+Partition and mount the disks as normal, then set the repository URL and target
+host output:
 
 ```bash
 REPOSITORY_URL="https://github.com/YOUR-ACCOUNT/YOUR-FORK.git"
-FLAKE_NAME="laptop"
+FLAKE_NAME="cottage"
 ```
 
-Clone your fork:
+Clone directly into the target system's writable configuration path:
 
 ```bash
-git clone "$REPOSITORY_URL" nixos-config
+sudo mkdir -p /mnt/etc
+sudo git clone "$REPOSITORY_URL" /mnt/etc/nixos
+cd /mnt/etc/nixos
 ```
 
-Change into the repository:
+Replace the cottage guard with hardware configuration generated directly from
+the mounted target filesystems:
 
 ```bash
-cd nixos-config
+sudo nixos-generate-config \
+  --root /mnt \
+  --show-hardware-config \
+  | sudo tee \
+      /mnt/etc/nixos/hosts/cottage/hardware-configuration.nix \
+      >/dev/null
 ```
 
-Replace the included hardware configuration with the one generated for the
-target computer:
+Stage the generated file so the Git-backed flake includes it, then run the soft
+build check:
 
 ```bash
-cp /mnt/etc/nixos/hardware-configuration.nix .
+sudo git add hosts/cottage/hardware-configuration.nix
+sudo nix build \
+  --impure \
+  --no-link \
+  ".#nixosConfigurations.${FLAKE_NAME}.config.system.build.toplevel"
 ```
 
-Install:
+The external NordVPN module must be available at
+`/etc/nixos-modules/nix_modules/nordvpn-module.nix` in the installer
+environment before evaluation. It must also be installed at that path in the
+target system.
+
+Install the selected host:
 
 ```bash
-sudo nixos-install --flake ".#$FLAKE_NAME" --impure
+sudo nixos-install --flake "/mnt/etc/nixos#$FLAKE_NAME" --impure
 ```
 
-Reboot.
+Set passwords for the users selected by cottage:
+
+```bash
+sudo nixos-enter --root /mnt -c 'passwd colum'
+sudo nixos-enter --root /mnt -c 'passwd cottage'
+```
+
+Give Colum ownership of the writable configuration checkout, then reboot:
+
+```bash
+sudo nixos-enter --root /mnt -c 'chown -R colum:users /etc/nixos'
+sudo reboot
+```
 
 ---
 
@@ -109,7 +146,7 @@ Pull the latest configuration:
 git pull
 ```
 
-Set `FLAKE_NAME` to the value configured in `flake.nix`:
+Set `FLAKE_NAME` to the current host output:
 
 ```bash
 FLAKE_NAME="laptop"
@@ -190,18 +227,29 @@ The main files are:
 /etc/nixos/
 |-- configuration.nix
 |-- flake.nix
-|-- home.nix
-|-- wallpapers/
-|   |-- dark_wallpaper.jpg
-|   `-- light_wallpaper.jpg
-`-- nvim/lua/
-    |-- chadrc.lua
-    `-- autocmds.lua
+|-- hosts/
+|   |-- laptop/
+|   |   |-- default.nix
+|   |   `-- hardware-configuration.nix
+|   `-- cottage/
+|       |-- default.nix
+|       `-- hardware-configuration.nix
+`-- users/
+    |-- colum/
+    |   |-- default.nix
+    |   |-- home.nix
+    |   |-- nvim/
+    |   `-- wallpapers/
+    `-- cottage/
+        |-- default.nix
+        |-- home.nix
+        |-- nvim/
+        `-- wallpapers/
 ```
 
 ### `home.nix`
 
-`/etc/nixos/home.nix` contains most of the implementation:
+Each `/etc/nixos/users/<username>/home.nix` contains that user's implementation:
 
 - Dark and light wallpaper paths
 - Dark and light Waybar CSS
@@ -260,9 +308,9 @@ its managed links.
 
 ### Neovim files
 
-`/etc/nixos/nvim/lua/chadrc.lua` reads the shared theme state when Neovim
-starts. `/etc/nixos/nvim/lua/autocmds.lua` checks that state every two seconds
-and reloads NvChad Base46 highlights when it changes.
+`/etc/nixos/users/<username>/nvim/lua/chadrc.lua` reads the shared theme state
+when Neovim starts. The adjacent `autocmds.lua` checks that state every two
+seconds and reloads NvChad Base46 highlights when it changes.
 
 | Desktop theme | NvChad theme |
 |---|---|
@@ -392,8 +440,8 @@ exist`.
 The wallpapers are Nix-managed assets:
 
 ```text
-/etc/nixos/wallpapers/dark_wallpaper.jpg
-/etc/nixos/wallpapers/light_wallpaper.jpg
+/etc/nixos/users/<username>/wallpapers/nix-dark.png
+/etc/nixos/users/<username>/wallpapers/nix-bright.png
 ```
 
 Hyprpaper preloads both images and enables IPC. The switcher can therefore
@@ -428,7 +476,7 @@ The switcher also writes custom GTK4 CSS to:
 
 Applications such as hyprKCS read this stylesheet when launched. There is no
 standalone `/etc/nixos/gtk-4.0/gtk.css`; both variants are Nix strings in
-`home.nix`.
+the selected user's `home.nix`.
 
 ## Waybar, Dunst, Rofi, and wlogout
 
@@ -531,7 +579,7 @@ The following are declarative and should be changed in `/etc/nixos`:
 - Hyprland keybinding
 - Neovim theme integration
 
-The main theme values are near the beginning of `home.nix`, including
+The main theme values are near the beginning of each user's `home.nix`, including
 `dark-wallpaper`, `light-wallpaper`, `waybar-dark-css`, `waybar-light-css`,
 `dunst-light-overrides`, `rofi-dark-config`, `rofi-light-config`,
 `gtk4-dark-css`, `gtk4-light-css`, `wlogout-dark-css`, and
