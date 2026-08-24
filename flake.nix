@@ -7,7 +7,6 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
-    claude-desktop.url = "github:aaddrick/claude-desktop-debian";
     opencode.url = "github:anomalyco/opencode";
     hyprKCS.url = "github:kosa12/hyprKCS";
     fast.url = "github:maaslalani/fast";
@@ -23,7 +22,6 @@
     nixpkgs,
     nixpkgs-unstable,
     home-manager,
-    claude-desktop,
     opencode,
     hyprKCS,
     fast,
@@ -87,7 +85,6 @@
 
           ({ lib, pkgs, ... }: {
             environment.systemPackages = [
-              claude-desktop.packages.${pkgs.system}.default
               opencode.packages.${pkgs.system}.default
               hyprKCS.packages.${pkgs.system}.default
               fast.packages.${pkgs.system}.default
