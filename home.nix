@@ -628,17 +628,33 @@ let
       NEW="dark"
     fi
 
+    if [ "$NEW" = "dark" ]; then
+      THEME_FILE=~/.config/kitty/theme-dark.conf
+      WALLPAPER=${dark-wallpaper}
+    else
+      THEME_FILE=~/.config/kitty/theme-light.conf
+      WALLPAPER=${light-wallpaper}
+    fi
+
+    # Do not commit shared state until the upgraded wallpaper IPC succeeds.
+    ATTEMPT=0
+    until hyprctl hyprpaper wallpaper ",$WALLPAPER,cover"; do
+      ATTEMPT=$((ATTEMPT + 1))
+      if [ "$ATTEMPT" -ge 20 ]; then
+        notify-send "Theme" "Could not switch the wallpaper"
+        exit 1
+      fi
+      sleep 0.25
+    done
+
+    mkdir -p "$(dirname "$STATE_FILE")"
     echo "$NEW" > "$STATE_FILE"
 
     # Kitty terminal colors
-    if [ "$NEW" = "dark" ]; then
-      THEME_FILE=~/.config/kitty/theme-dark.conf
-    else
-      THEME_FILE=~/.config/kitty/theme-light.conf
-    fi
     ln -sf "$THEME_FILE" ~/.config/kitty/current-theme.conf
-    for pid in $(pgrep kitty); do
-      kitten @ --to "unix:/tmp/kittyrcontrol-$pid" set-colors --all --configured "$THEME_FILE" 2>/dev/null || true
+    for socket in /tmp/kittyrcontrol-*; do
+      [ -S "$socket" ] || continue
+      kitten @ --to "unix:$socket" set-colors --all --configured "$THEME_FILE" 2>/dev/null || true
     done
 
     # Hyprland border colors
@@ -648,13 +664,6 @@ let
     else
       hyprctl keyword general:col.active_border "rgba(11d424ff) rgba(0e8a1aff) 45deg"
       hyprctl keyword general:col.inactive_border "rgba(00ffffff) rgba(0055ffff) 45deg"
-    fi
-
-    # Wallpaper
-    if [ "$NEW" = "dark" ]; then
-      hyprctl hyprpaper wallpaper , ${dark-wallpaper}
-    else
-      hyprctl hyprpaper wallpaper , ${light-wallpaper}
     fi
 
     # GTK / Electron / Libadwaita color scheme
@@ -774,7 +783,7 @@ in
     toggle-theme
     brightness-adjust
     (pkgs.writeShellScriptBin "rebuild-nixos" ''
-      sudo nixos-rebuild switch --flake "${flakeReference}" --impure
+      sudo nixos-rebuild switch --flake "${flakeReference}"
       echo ""
       echo "Press any key to close..."
       read -n 1
@@ -798,7 +807,7 @@ in
 
   programs.git = {
     enable = true;
-    extraConfig.credential.helper = "store";
+    settings.credential.helper = "store";
   };
 
   programs.kitty = {
@@ -819,13 +828,16 @@ in
   programs.neovim = {
     enable = true;
     defaultEditor = true;
+    sideloadInitLua = true;
+    withPython3 = true;
+    withRuby = true;
   };
 
   programs.bash = {
     enable = true;
     shellAliases = {
-      rebuild = "sudo nixos-rebuild switch --flake '${flakeReference}' --impure";
-      update = "sudo nixos-rebuild switch --flake '${flakeReference}' --impure --upgrade";
+      rebuild = "sudo nixos-rebuild switch --flake '${flakeReference}'";
+      update = "nix flake update --flake '${profile.configDirectory}' && sudo nixos-rebuild switch --flake '${flakeReference}'";
       gco = "git checkout";
       gs = "git status";
       gl = "git log --oneline -10";
@@ -840,6 +852,7 @@ in
     enable = true;
     package = null;
     portalPackage = null;
+    configType = "hyprlang";
 
     settings = {
       "$terminal" = "kitty";
@@ -919,7 +932,6 @@ in
       };
 
       dwindle = {
-        pseudotile = true;
         preserve_split = true;
       };
 
@@ -932,17 +944,12 @@ in
         disable_hyprland_logo = true;
       };
 
-      gestures = {
-        workspace_swipe = false;
-      };
-
       "$mainMod" = "SUPER";
 
       exec-once = [
         "nm-applet"
         "blueman-applet"
         "waybar"
-        "hyprpaper"
         "hypridle"
         "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
         "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
@@ -957,7 +964,7 @@ in
         "$mainMod, V, togglefloating,"
         "$mainMod, F, fullscreen"
         "$mainMod, P, pseudo,"
-        "$mainMod, N, togglesplit,"
+        "$mainMod, N, layoutmsg, togglesplit"
         "$mainMod SHIFT, L, exec, hyprlock"
         "$mainMod, slash, exec, hyprkcs"
         "$mainMod, O, exec, $terminal opencode"
@@ -1046,17 +1053,13 @@ in
       ];
 
       windowrule = [
-        "suppressevent maximize, class:.*"
-        "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
-        "float,class:^(pavucontrol)$"
-        "float,class:^(nm-connection-editor)$"
-        "float,class:^(blueman-manager)$"
-        "center,class:^(blueman-manager)$"
-        "float,class:^(hyprkcs)$"
-        "center,class:^(hyprkcs)$"
-        "size 889 854, class:^(hyprkcs)$"
-        "rounding 5, class:^(kitty)$"
-        "suppressevent fullscreen, class:^(kitty)$"
+        "match:class .*, suppress_event maximize"
+        "match:class ^$, match:title ^$, match:xwayland true, match:float true, match:fullscreen false, match:pin false, no_focus true"
+        "match:class ^(pavucontrol)$, float true"
+        "match:class ^(nm-connection-editor)$, float true"
+        "match:class ^(blueman-manager)$, float true, center true"
+        "match:class ^(hyprkcs)$, float true, center true, size 889 854"
+        "match:class ^(kitty)$, rounding 5, suppress_event fullscreen"
       ];
     };
   };
@@ -1193,12 +1196,20 @@ in
   # ==========================================
   # hyprpaper
   # ==========================================
-  xdg.configFile."hypr/hyprpaper.conf".text = ''
-    preload = ${dark-wallpaper}
-    preload = ${light-wallpaper}
-    wallpaper = , ${dark-wallpaper}
-    ipc = on
-  '';
+  services.hyprpaper = {
+    enable = true;
+    settings = {
+      ipc = true;
+      splash = false;
+      wallpaper = [
+        {
+          monitor = "";
+          path = "${dark-wallpaper}";
+          fit_mode = "cover";
+        }
+      ];
+    };
+  };
 
   # ==========================================
   # Notification daemon (dunst)

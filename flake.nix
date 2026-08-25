@@ -5,15 +5,19 @@
   description = "Reusable NixOS and Home Manager configuration";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     claude-desktop.url = "github:aaddrick/claude-desktop-debian";
     opencode.url = "github:anomalyco/opencode";
     hyprKCS.url = "github:kosa12/hyprKCS";
     fast.url = "github:maaslalani/fast";
+    nordvpn-module = {
+      url = "git+file:///etc/nixos-modules/nix_modules";
+      flake = false;
+    };
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.05";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -27,6 +31,7 @@
     opencode,
     hyprKCS,
     fast,
+    nordvpn-module,
     ...
   }:
   let
@@ -46,7 +51,7 @@
     nixosConfigurations.${profile.flakeName} = nixpkgs.lib.nixosSystem {
       inherit system;
 
-      specialArgs = { inherit profile unstablePkgs; };
+      specialArgs = { inherit profile unstablePkgs nordvpn-module; };
 
 	pkgs = import nixpkgs {
 		inherit system;
@@ -56,10 +61,10 @@
   modules = [
     ({ pkgs, ... }: {
       environment.systemPackages = [ 
-		    claude-desktop.packages.${pkgs.system}.default
-        opencode.packages.${pkgs.system}.default
-        hyprKCS.packages.${pkgs.system}.default
-        fast.packages.${pkgs.system}.default
+		    claude-desktop.packages.${system}.default
+        opencode.packages.${system}.default
+        hyprKCS.packages.${system}.default
+        fast.packages.${system}.default
 	    ];
 	  })
         ./configuration.nix

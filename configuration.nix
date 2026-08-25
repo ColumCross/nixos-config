@@ -1,12 +1,12 @@
 # =========================
 # configuration.nix
 # =========================
-{ config, pkgs, profile, unstablePkgs, ... }:
+{ config, pkgs, profile, unstablePkgs, nordvpn-module, ... }:
 
 {
   imports = [
     ./hardware-configuration.nix
-    /etc/nixos-modules/nix_modules/nordvpn-module.nix
+    "${nordvpn-module}/nordvpn-module.nix"
   ];
 
   services.udisks2.enable = true;
@@ -16,7 +16,7 @@
   #################################
 
   boot.loader.systemd-boot.enable = true;
-  boot.loader.systemd-boot.configurationLimit = 10;
+  boot.loader.systemd-boot.configurationLimit = null;
   boot.loader.efi.canTouchEfiVariables = true;
 
   #################################
@@ -48,7 +48,7 @@
 
     settings.default_session = {
 
-      command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd ${pkgs.hyprland}/bin/Hyprland";
+      command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd ${config.programs.hyprland.package}/bin/Hyprland";
       user = "greeter";
       
     };
