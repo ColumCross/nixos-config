@@ -828,7 +828,6 @@ in
   programs.neovim = {
     enable = true;
     defaultEditor = true;
-    sideloadInitLua = true;
     withPython3 = true;
     withRuby = true;
   };

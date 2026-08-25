@@ -48,7 +48,7 @@
 
     settings.default_session = {
 
-      command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd ${config.programs.hyprland.package}/bin/Hyprland";
+      command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd ${config.programs.hyprland.package}/bin/start-hyprland";
       user = "greeter";
       
     };
