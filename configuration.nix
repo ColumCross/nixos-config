@@ -45,12 +45,10 @@
 
   services.greetd = {
     enable = true;
-
+    useTextGreeter = true;
     settings.default_session = {
-
-      command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd ${config.programs.hyprland.package}/bin/start-hyprland";
+      command = "${pkgs.tuigreet}/bin/tuigreet --time --user-menu --user-menu-min-uid 1000 --user-menu-max-uid 1000 --cmd ${config.programs.hyprland.package}/bin/start-hyprland";
       user = "greeter";
-      
     };
   };
 

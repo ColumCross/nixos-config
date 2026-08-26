@@ -613,20 +613,17 @@ let
   # ==========================================
   # Toggle theme script
   # ==========================================
-  toggle-theme = pkgs.writeShellScriptBin "toggle-theme" ''
+  set-theme = pkgs.writeShellScriptBin "set-theme" ''
+    NEW="$1"
+    QUIET="''${2:-}"
     STATE_FILE="$HOME/.cache/current-theme"
 
-    if [ -f "$STATE_FILE" ]; then
-      CURRENT=$(cat "$STATE_FILE")
-    else
-      CURRENT="dark"
-    fi
-
-    if [ "$CURRENT" = "dark" ]; then
-      NEW="light"
-    else
-      NEW="dark"
-    fi
+    case "$NEW" in
+      dark|light) ;;
+      *)
+        exit 2
+        ;;
+    esac
 
     if [ "$NEW" = "dark" ]; then
       THEME_FILE=~/.config/kitty/theme-dark.conf
@@ -730,7 +727,19 @@ let
     WLOGOUTEOF
     fi
 
-    notify-send "Theme" "Switched to $NEW mode"
+    if [ "$QUIET" != "--quiet" ]; then
+      notify-send "Theme" "Switched to $NEW mode"
+    fi
+  '';
+
+  toggle-theme = pkgs.writeShellScriptBin "toggle-theme" ''
+    STATE_FILE="$HOME/.cache/current-theme"
+
+    if [ -f "$STATE_FILE" ] && [ "$(cat "$STATE_FILE")" = "dark" ]; then
+      exec set-theme light
+    fi
+
+    exec set-theme dark
   '';
 
   # Brightness adjustment logic
@@ -780,6 +789,8 @@ in
 
   home.packages = [
     pkgs.networkmanager_dmenu
+    pkgs.sound-theme-freedesktop
+    set-theme
     toggle-theme
     brightness-adjust
     (pkgs.writeShellScriptBin "rebuild-nixos" ''
@@ -941,6 +952,7 @@ in
       misc = {
         force_default_wallpaper = 0;
         disable_hyprland_logo = true;
+        disable_splash_rendering = true;
       };
 
       "$mainMod" = "SUPER";
@@ -950,6 +962,7 @@ in
         "blueman-applet"
         "waybar"
         "hypridle"
+        "set-theme dark --quiet"
         "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
         "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
       ];
@@ -1269,6 +1282,12 @@ in
         background = "#bf616a";
         foreground = "#eceff4";
         timeout = 0;
+      };
+
+      notification-sound = {
+        script = "${pkgs.writeShellScript "dunst-notification-sound" ''
+          ${pkgs.pipewire}/bin/pw-play --volume 0.5 ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/message-new-instant.oga >/dev/null 2>&1 &
+        ''}";
       };
     };
   };
@@ -1590,7 +1609,7 @@ in
   # ==========================================
   xdg.configFile = {
     "nvim/init.lua".source = ./nvim/init.lua;
-    "nvim/lazy-lock.json".source = ./nvim/lazy-lock.json;
+    "nvim/lazy-lock.json".source = config.lib.file.mkOutOfStoreSymlink "${profile.configDirectory}/nvim/lazy-lock.json";
     "nvim/.stylua.toml".source = ./nvim/.stylua.toml;
     "nvim/lua".source = ./nvim/lua;
 
