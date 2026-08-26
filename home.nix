@@ -615,7 +615,6 @@ let
   # ==========================================
   set-theme = pkgs.writeShellScriptBin "set-theme" ''
     NEW="$1"
-    QUIET="''${2:-}"
     STATE_FILE="$HOME/.cache/current-theme"
 
     case "$NEW" in
@@ -727,9 +726,6 @@ let
     WLOGOUTEOF
     fi
 
-    if [ "$QUIET" != "--quiet" ]; then
-      notify-send "Theme" "Switched to $NEW mode"
-    fi
   '';
 
   toggle-theme = pkgs.writeShellScriptBin "toggle-theme" ''
@@ -962,7 +958,7 @@ in
         "blueman-applet"
         "waybar"
         "hypridle"
-        "set-theme dark --quiet"
+        "set-theme dark"
         "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
         "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
       ];
