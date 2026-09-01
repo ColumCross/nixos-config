@@ -34,6 +34,12 @@ compatibility.
 |-- home.nix
 |-- AGENTS.md
 |-- README.md
+|-- patches/
+|   `-- waybar-hyprland-workspace-dnd.patch
+|-- scripts/
+|   `-- workspace-control.py
+|-- tests/
+|   `-- test_workspace_control.py
 |-- nvim/
 |   |-- init.lua
 |   |-- lazy-lock.json
@@ -48,9 +54,10 @@ compatibility.
 Bluetooth, greetd, portals, and Hyprland enablement. `packages.nix` owns system
 packages and NordVPN configuration.
 
-`home.nix` owns the user's shell, desktop session, theme switcher, Waybar,
-Dunst, Hyprpaper, Hypridle, Hyprlock, Rofi, Kitty, Neovim mappings, and wrapper
-scripts.
+`home.nix` owns the user's shell, desktop session, theme switcher, workspace
+controller, Waybar, Dunst, Hyprpaper, Hypridle, Hyprlock, Rofi, Kitty, Neovim
+mappings, and wrapper scripts. The tracked Waybar patch adds the GTK drag/drop
+hook used by the workspace controller.
 
 `hardware-configuration.nix` is generated for this machine and should not be
 edited manually.
@@ -117,8 +124,10 @@ format through:
 configType = "hyprlang";
 ```
 
-The desktop starts Waybar, NetworkManager and Bluetooth applets, Hypridle, and
-the dark theme. The default Hyprland logo and splash rendering are disabled.
+The desktop starts NetworkManager and Bluetooth applets, Hypridle, and the dark
+theme. Waybar is a Home Manager systemd user service attached to the Hyprland
+session target, so an activated generation runs its configured package. The
+default Hyprland logo and splash rendering are disabled.
 Alt-dragging a tiled window uses precise cursor-based placement, allowing it to
 be dropped on any side of another tiled window.
 
@@ -135,6 +144,11 @@ Notable shortcuts:
 | `SUPER+CTRL+SHIFT+R` | Open the rebuild wrapper |
 | `SUPER+CTRL+C` | Open OpenCode in `/etc/nixos` |
 | `SUPER+CTRL+SHIFT+C` | Open Neovim in `/etc/nixos` |
+| `SUPER+1` through `SUPER+0` | Select visible desktop 1 through 10 |
+| `SUPER+SHIFT+1` through `SUPER+SHIFT+0` | Move the active window to visible desktop 1 through 10 |
+| `SUPER+LEFT` / `SUPER+RIGHT` | Select the previous/next visible desktop |
+| `SUPER+SHIFT+LEFT` / `SUPER+SHIFT+RIGHT` | Move the active window one visible desktop left/right |
+| `SUPER+SHIFT+ALT+LEFT` / `SUPER+SHIFT+ALT+RIGHT` | Move the current desktop one visible position left/right |
 | `CTRL+SHIFT+4` | Copy a selected-area screenshot |
 | `CTRL+SHIFT+5` | Copy a full-screen screenshot |
 
@@ -191,6 +205,55 @@ Kitty's palette files are user-owned files at:
 `~/.config/kitty/current-theme.conf` points to the selected file. Kitty permits
 remote control through per-process sockets, allowing the switcher to recolor
 running terminals. The palette files can be edited without rebuilding NixOS.
+
+# Workspace Reordering
+
+The desktop has a single workspace control command with explicit operations:
+
+```sh
+workspace-control focus 2
+workspace-control move 2
+workspace-control cycle next
+workspace-control move-relative next
+workspace-control shift previous
+workspace-control reorder SOURCE_ID TARGET_ID before
+```
+
+Waybar desktops can be dragged onto another visible desktop. Drop on the left
+half of the target to insert before it or its right half to insert after it.
+Pressing and dragging does not immediately change the desktop order or its
+number. Waybar only marks the dragged desktop and prospective insertion edge.
+The reorder occurs after the mouse button is released over a valid target;
+releasing outside a target cancels it without changing anything.
+
+After a successful drop, every existing numbered desktop is renumbered in its
+new global order while keeping its windows and monitor assignment. For example,
+dragging desktop 4 before desktop 2 changes the underlying content order to 1,
+4, 2, 3, then labels those positions 1, 2, 3, 4. The sequence remains globally
+unique when another monitor is attached. `SUPER+2`, the matching window-move
+shortcut, Waybar clicks, and left/right navigation then use the new second
+desktop. Only existing desktops are displayed; empty desktops are not retained
+as drag targets.
+
+`SUPER+SHIFT+LEFT` and `SUPER+SHIFT+RIGHT` move the active window to the
+previous or next visible desktop. `SUPER+SHIFT+ALT+LEFT` and
+`SUPER+SHIFT+ALT+RIGHT` move the current desktop one visible position in that
+direction. These relative actions stop at the first and last visible desktop;
+they do not wrap.
+
+The feature is fully declarative and cloneable. The tracked patch at
+`patches/waybar-hyprland-workspace-dnd.patch` adds an opt-in `on-drop` action to
+the pinned Waybar package. `home.nix` applies that patch with a package override,
+builds `scripts/workspace-control.py` with explicit Nix runtime dependencies,
+and configures the Hyprland workspace module to invoke it. No external checkout
+or manual patching is required after cloning this repository.
+
+Workspace renumbering is deferred until Waybar's successful GTK drop callback.
+The controller serializes all workspace operations, validates Hyprland replies,
+uses a collision-free temporary name, and verifies the final ID-to-name mapping.
+If a rename fails or the process is interrupted, it restores and verifies the
+original mapping before reporting success; an incomplete rollback is reported
+explicitly through Dunst. Successful reorders are intentionally silent.
 
 ## Notifications
 

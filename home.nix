@@ -6,6 +6,22 @@
 let
   flakeReference = "${profile.configDirectory}#${profile.flakeName}";
 
+  patched-waybar = pkgs.waybar.overrideAttrs (old: {
+    patches = (old.patches or []) ++ [ ./patches/waybar-hyprland-workspace-dnd.patch ];
+  });
+
+  workspace-control = pkgs.writeShellApplication {
+    name = "workspace-control";
+    runtimeInputs = [
+      pkgs.hyprland
+      pkgs.libnotify
+      pkgs.python3
+    ];
+    text = ''
+      exec python3 ${./scripts/workspace-control.py} "$@"
+    '';
+  };
+
   # ==========================================
   # Theme definitions
   # ==========================================
@@ -79,6 +95,17 @@ let
     #workspaces button:hover { color: @teal; }
     #workspaces button.active { color: #B91C1C; font-weight: bold; }
     #workspaces button.urgent { color: @pink; }
+    #workspaces button.dragging { opacity: 0.45; }
+    #workspaces button.drop-before {
+      color: @yellow;
+      background: rgba(255, 255, 0, 0.14);
+      box-shadow: inset 3px 0 @yellow;
+    }
+    #workspaces button.drop-after {
+      color: @yellow;
+      background: rgba(255, 255, 0, 0.14);
+      box-shadow: inset -3px 0 @yellow;
+    }
 
     #clock, #battery, #cpu, #memory, #backlight, #disk, #network,
     #bluetooth, #pulseaudio, #wireplumber, #custom-media, #tray,
@@ -210,6 +237,17 @@ let
     #workspaces button:hover { color: @teal; }
     #workspaces button.active { color: #B91C1C; font-weight: bold; }
     #workspaces button.urgent { color: @pink; }
+    #workspaces button.dragging { opacity: 0.45; }
+    #workspaces button.drop-before {
+      color: @yellow;
+      background: rgba(170, 136, 0, 0.14);
+      box-shadow: inset 3px 0 @yellow;
+    }
+    #workspaces button.drop-after {
+      color: @yellow;
+      background: rgba(170, 136, 0, 0.14);
+      box-shadow: inset -3px 0 @yellow;
+    }
 
     #clock, #battery, #cpu, #memory, #backlight, #disk, #network,
     #bluetooth, #pulseaudio, #wireplumber, #custom-media, #tray,
@@ -789,6 +827,7 @@ in
     set-theme
     toggle-theme
     brightness-adjust
+    workspace-control
     (pkgs.writeShellScriptBin "rebuild-nixos" ''
       sudo nixos-rebuild switch --flake "${flakeReference}"
       echo ""
@@ -956,11 +995,8 @@ in
       exec-once = [
         "nm-applet"
         "blueman-applet"
-        "waybar"
         "hypridle"
         "set-theme dark"
-        "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
-        "systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
       ];
 
       bind = [
@@ -1003,33 +1039,37 @@ in
         "$mainMod, K, movefocus, u"
         "$mainMod, L, movefocus, r"
 
-        # Workspaces 1-10
-        "$mainMod, 1, workspace, 1"
-        "$mainMod, 2, workspace, 2"
-        "$mainMod, 3, workspace, 3"
-        "$mainMod, 4, workspace, 4"
-        "$mainMod, 5, workspace, 5"
-        "$mainMod, 6, workspace, 6"
-        "$mainMod, 7, workspace, 7"
-        "$mainMod, 8, workspace, 8"
-        "$mainMod, 9, workspace, 9"
-        "$mainMod, 0, workspace, 10"
+        # Workspaces 1-10 follow the current visible numbering
+        "$mainMod, 1, exec, workspace-control focus 1"
+        "$mainMod, 2, exec, workspace-control focus 2"
+        "$mainMod, 3, exec, workspace-control focus 3"
+        "$mainMod, 4, exec, workspace-control focus 4"
+        "$mainMod, 5, exec, workspace-control focus 5"
+        "$mainMod, 6, exec, workspace-control focus 6"
+        "$mainMod, 7, exec, workspace-control focus 7"
+        "$mainMod, 8, exec, workspace-control focus 8"
+        "$mainMod, 9, exec, workspace-control focus 9"
+        "$mainMod, 0, exec, workspace-control focus 10"
 
         # Move window to workspace
-        "$mainMod SHIFT, 1, movetoworkspace, 1"
-        "$mainMod SHIFT, 2, movetoworkspace, 2"
-        "$mainMod SHIFT, 3, movetoworkspace, 3"
-        "$mainMod SHIFT, 4, movetoworkspace, 4"
-        "$mainMod SHIFT, 5, movetoworkspace, 5"
-        "$mainMod SHIFT, 6, movetoworkspace, 6"
-        "$mainMod SHIFT, 7, movetoworkspace, 7"
-        "$mainMod SHIFT, 8, movetoworkspace, 8"
-        "$mainMod SHIFT, 9, movetoworkspace, 9"
-        "$mainMod SHIFT, 0, movetoworkspace, 10"
+        "$mainMod SHIFT, 1, exec, workspace-control move 1"
+        "$mainMod SHIFT, 2, exec, workspace-control move 2"
+        "$mainMod SHIFT, 3, exec, workspace-control move 3"
+        "$mainMod SHIFT, 4, exec, workspace-control move 4"
+        "$mainMod SHIFT, 5, exec, workspace-control move 5"
+        "$mainMod SHIFT, 6, exec, workspace-control move 6"
+        "$mainMod SHIFT, 7, exec, workspace-control move 7"
+        "$mainMod SHIFT, 8, exec, workspace-control move 8"
+        "$mainMod SHIFT, 9, exec, workspace-control move 9"
+        "$mainMod SHIFT, 0, exec, workspace-control move 10"
 
-        # Navigate workspaces with Z/X
-        "$mainMod, left, workspace, e-1"
-        "$mainMod, right, workspace, e+1"
+        # Navigate workspaces by their current visible order
+        "$mainMod, left, exec, workspace-control cycle previous"
+        "$mainMod, right, exec, workspace-control cycle next"
+        "$mainMod SHIFT, left, exec, workspace-control move-relative previous"
+        "$mainMod SHIFT, right, exec, workspace-control move-relative next"
+        "$mainMod SHIFT ALT, left, exec, workspace-control shift previous"
+        "$mainMod SHIFT ALT, right, exec, workspace-control shift next"
       ];
 
       bindel = [
@@ -1077,6 +1117,11 @@ in
   # ==========================================
   programs.waybar = {
     enable = true;
+    package = patched-waybar;
+    systemd = {
+      enable = true;
+      targets = [ "hyprland-session.target" ];
+    };
     settings = {
       mainBar = {
         layer = "top";
@@ -1108,6 +1153,8 @@ in
         "hyprland/workspaces" = {
           format = "{name}";
           on-click = "activate";
+          on-drop = "workspace-control reorder {source} {target} {placement}";
+          sort-by = "number";
         };
 
         clock = {
@@ -1181,6 +1228,7 @@ in
 
         tray = {
           icon-size = waybarTrayIconSize;
+          show-passive-items = true;
           spacing = 8;
         };
 

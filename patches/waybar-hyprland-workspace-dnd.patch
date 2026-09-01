@@ -1,0 +1,131 @@
+diff --git a/include/modules/hyprland/workspace.hpp b/include/modules/hyprland/workspace.hpp
+--- a/include/modules/hyprland/workspace.hpp
++++ b/include/modules/hyprland/workspace.hpp
+@@ -47 +47 @@ class Workspace {
+-  bool handleClicked(GdkEventButton* bt) const;
++  bool handleClicked(GdkEventButton* bt);
+@@ -94 +94,12 @@ class Workspace {
++  bool handleDragDrop(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time);
++  bool handleDragMotion(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time);
++  void handleDragBegin(const Glib::RefPtr<Gdk::DragContext>& context);
++  void handleDragEnd(const Glib::RefPtr<Gdk::DragContext>& context);
++  void handleDragLeave(const Glib::RefPtr<Gdk::DragContext>& context, guint time);
++  void handleDragDataGet(const Glib::RefPtr<Gdk::DragContext>& context, Gtk::SelectionData& selection_data, guint info, guint time);
++  void handleDragDataReceived(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time);
++  void setDropPlacement(int x);
++  void clearDropPlacement();
+   IPC& m_ipc;
++  bool m_dragWasStarted = false;
++  bool m_dropAfter = false;
+diff --git a/include/modules/hyprland/workspaces.hpp b/include/modules/hyprland/workspaces.hpp
+--- a/include/modules/hyprland/workspaces.hpp
++++ b/include/modules/hyprland/workspaces.hpp
+@@ -54 +54,2 @@ class Workspaces : public AModule, public EventHandler {
+   auto getIgnoredWindows() const -> std::vector<std::regex> { return m_ignoreWindows; }
++  auto onWorkspaceDrop() const -> std::string { return m_onWorkspaceDrop; }
+@@ -199 +199,2 @@ class Workspaces : public AModule, public EventHandler {
+   std::string m_currentActiveWindowAddress;
++  std::string m_onWorkspaceDrop;
+diff --git a/src/modules/hyprland/workspace.cpp b/src/modules/hyprland/workspace.cpp
+--- a/src/modules/hyprland/workspace.cpp
++++ b/src/modules/hyprland/workspace.cpp
+@@ -13,0 +14,3 @@ namespace waybar::modules::hyprland {
++static const std::vector<Gtk::TargetEntry> workspace_target_entries = {
++    Gtk::TargetEntry("WAYBAR_HYPRLAND_WORKSPACE", Gtk::TARGET_SAME_APP, 0)};
++
+@@ -32,3 +35,14 @@ Workspace::Workspace(const Json::Value& workspace_data, Workspaces& workspace_ma
+-  m_button.add_events(Gdk::BUTTON_PRESS_MASK);
+-  m_button.signal_button_press_event().connect(sigc::mem_fun(*this, &Workspace::handleClicked),
+-                                               false);
++  m_button.add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
++  m_button.signal_button_release_event().connect(sigc::mem_fun(*this, &Workspace::handleClicked), false);
++
++  if (!m_workspaceManager.onWorkspaceDrop().empty() && !m_isSpecial && std::regex_match(m_name, std::regex("^[0-9]+$"))) {
++    m_button.drag_source_set(workspace_target_entries, Gdk::BUTTON1_MASK, Gdk::ACTION_MOVE);
++    m_button.drag_dest_set(workspace_target_entries, Gtk::DEST_DEFAULT_HIGHLIGHT, Gdk::ACTION_MOVE);
++    m_button.signal_drag_begin().connect(sigc::mem_fun(*this, &Workspace::handleDragBegin));
++    m_button.signal_drag_end().connect(sigc::mem_fun(*this, &Workspace::handleDragEnd));
++    m_button.signal_drag_motion().connect(sigc::mem_fun(*this, &Workspace::handleDragMotion), false);
++    m_button.signal_drag_leave().connect(sigc::mem_fun(*this, &Workspace::handleDragLeave), false);
++    m_button.signal_drag_drop().connect(sigc::mem_fun(*this, &Workspace::handleDragDrop), false);
++    m_button.signal_drag_data_get().connect(sigc::mem_fun(*this, &Workspace::handleDragDataGet), false);
++    m_button.signal_drag_data_received().connect(sigc::mem_fun(*this, &Workspace::handleDragDataReceived), false);
++  }
+@@ -69 +87 @@ std::optional<WindowRepr> Workspace::closeWindow(WindowAddress const& addr) {
+-bool Workspace::handleClicked(GdkEventButton* bt) const {
++bool Workspace::handleClicked(GdkEventButton* bt) {
+@@ -70 +88,6 @@ bool Workspace::handleClicked(GdkEventButton* bt) {
+-  if (bt->type == GDK_BUTTON_PRESS) {
++  if (bt->type == GDK_BUTTON_RELEASE) {
++    if (m_dragWasStarted) {
++      m_dragWasStarted = false;
++      return true;
++    }
++
+@@ -96,0 +101,60 @@ bool Workspace::handleClicked(GdkEventButton* bt) {
++void Workspace::setDropPlacement(int x) {
++  const bool dropAfter = x >= m_button.get_allocated_width() / 2;
++  auto context = m_button.get_style_context();
++  m_dropAfter = dropAfter;
++  context->remove_class(dropAfter ? "drop-before" : "drop-after");
++  context->add_class(dropAfter ? "drop-after" : "drop-before");
++}
++void Workspace::clearDropPlacement() {
++  auto context = m_button.get_style_context();
++  context->remove_class("drop-before");
++  context->remove_class("drop-after");
++}
++void Workspace::handleDragBegin(const Glib::RefPtr<Gdk::DragContext>& context) {
++  m_dragWasStarted = true;
++  m_button.get_style_context()->add_class("dragging");
++}
++void Workspace::handleDragEnd(const Glib::RefPtr<Gdk::DragContext>& context) {
++  m_button.get_style_context()->remove_class("dragging");
++  clearDropPlacement();
++}
++bool Workspace::handleDragMotion(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time) {
++  setDropPlacement(x);
++  context->drag_status(Gdk::ACTION_MOVE, time);
++  return true;
++}
++void Workspace::handleDragLeave(const Glib::RefPtr<Gdk::DragContext>& context, guint time) {
++  clearDropPlacement();
++}
++bool Workspace::handleDragDrop(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time) {
++  setDropPlacement(x);
++  m_button.drag_get_data(context, "WAYBAR_HYPRLAND_WORKSPACE", time);
++  return true;
++}
++void Workspace::handleDragDataGet(const Glib::RefPtr<Gdk::DragContext>& context, Gtk::SelectionData& selection_data, guint info, guint time) {
++  selection_data.set("WAYBAR_HYPRLAND_WORKSPACE", std::to_string(id()));
++}
++void Workspace::handleDragDataReceived(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& selection_data, guint info, guint time) {
++  clearDropPlacement();
++  bool success = false;
++  try {
++    const std::string sourceText = selection_data.get_data_as_string();
++    size_t parsed = 0;
++    const int sourceId = std::stoi(sourceText, &parsed);
++    if (sourceText.empty() || parsed != sourceText.size()) {
++      throw std::invalid_argument("workspace ID contains invalid data");
++    }
++    if (sourceId == id()) {
++      success = true;
++    } else {
++      std::string command = m_workspaceManager.onWorkspaceDrop();
++      command = std::regex_replace(command, std::regex("\\{source\\}"), std::to_string(sourceId));
++      command = std::regex_replace(command, std::regex("\\{target\\}"), std::to_string(id()));
++      command = std::regex_replace(command, std::regex("\\{placement\\}"), m_dropAfter ? "after" : "before");
++      success = util::command::execNoRead(command).exit_code == 0;
++    }
++  } catch (const std::exception& error) {
++    spdlog::error("Invalid workspace drag data: {}", error.what());
++  }
++  context->drag_finish(success, false, time);
++}
+diff --git a/src/modules/hyprland/workspaces.cpp b/src/modules/hyprland/workspaces.cpp
+--- a/src/modules/hyprland/workspaces.cpp
++++ b/src/modules/hyprland/workspaces.cpp
+@@ -638 +638,2 @@ auto Workspaces::parseConfig(const Json::Value& config) -> void {
+   populateBoolConfig(config, "move-to-monitor", m_moveToMonitor);
++  m_onWorkspaceDrop = config.get("on-drop", "").asString();

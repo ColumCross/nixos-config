@@ -1,2 +1,5 @@
 #AGENTS.md
 /result
+/tests/
+scripts/__pycache__/
+*.py[cod]

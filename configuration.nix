@@ -12,6 +12,8 @@
 
   services.udisks2.enable = true;
 
+  services.logind.settings.Login.HandlePowerKey = "suspend";
+
   #################################
   ## Bootloader
   #################################
