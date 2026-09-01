@@ -27,6 +27,7 @@ compatibility.
 ```text
 /etc/nixos/
 |-- configuration.nix
+|-- packages.nix
 |-- flake.nix
 |-- flake.lock
 |-- hardware-configuration.nix
@@ -43,8 +44,9 @@ compatibility.
     `-- nix-bright.png
 ```
 
-`configuration.nix` owns system services, users, packages, fonts, networking,
-audio, Bluetooth, greetd, portals, Hyprland enablement, and NordVPN.
+`configuration.nix` owns system services, users, fonts, networking, audio,
+Bluetooth, greetd, portals, and Hyprland enablement. `packages.nix` owns system
+packages and NordVPN configuration.
 
 `home.nix` owns the user's shell, desktop session, theme switcher, Waybar,
 Dunst, Hyprpaper, Hypridle, Hyprlock, Rofi, Kitty, Neovim mappings, and wrapper
@@ -117,6 +119,8 @@ configType = "hyprlang";
 
 The desktop starts Waybar, NetworkManager and Bluetooth applets, Hypridle, and
 the dark theme. The default Hyprland logo and splash rendering are disabled.
+Alt-dragging a tiled window uses precise cursor-based placement, allowing it to
+be dropped on any side of another tiled window.
 
 Notable shortcuts:
 
@@ -214,6 +218,20 @@ different:
 It is an out-of-store link, so `:Lazy sync` can update the tracked repository
 file directly. Review and commit that change like any other configuration
 change.
+
+Markdown buffers use filename/path completion only; LSP, snippet, buffer-word,
+and Lua completion remain enabled for other filetypes. This applies to all files
+Neovim identifies as `markdown`, including `.md` and `.markdown` files.
+
+`bullets.nvim` uses its default configuration. In Markdown, text, and gitcommit
+buffers, `Enter` continues a list, so entering `1. Text` and pressing Enter
+starts `2. `. `Ctrl+Enter` inserts a plain newline, `gN` renumbers lists, and
+the plugin's other default list and checkbox mappings remain available.
+
+## EasyEffects
+
+EasyEffects starts with no active preset. The Nix-managed `HB-Mid` output preset
+remains available for manual selection in the application.
 
 ## Rebuild And Update Workflow
 

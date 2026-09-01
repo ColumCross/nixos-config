@@ -809,7 +809,6 @@ in
 
   services.easyeffects = {
     enable = true;
-    preset = "HB-Mid";
   };
 
   programs.git = {
@@ -939,6 +938,7 @@ in
 
       dwindle = {
         preserve_split = true;
+        precise_mouse_move = true;
       };
 
       master = {

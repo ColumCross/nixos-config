@@ -6,6 +6,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ./packages.nix
     "${nordvpn-module}/nordvpn-module.nix"
   ];
 
@@ -112,57 +113,6 @@
 
     shell = pkgs.bash;
   };
-
-  #################################
-  ## Packages
-  #################################
-
-  environment.systemPackages = with pkgs; [
-
-    git
-    kitty
-    google-chrome
-    wget
-    curl
-    discord
-    ripgrep
-    fd
-    gcc
-  	gnumake
-  	unzip
-  	wl-clipboard
-    kalker
-    gh
-    sl
-    fastfetch
-    md-tui
-    btop
-    vlc
-
-    # Desktop utilities
-    rofi
-    brightnessctl
-    grim
-    slurp
-    playerctl
-    pavucontrol
-    hyprpaper
-    hypridle
-    hyprlock
-    dunst
-    libnotify
-    unstablePkgs.spotify-player
-    blueman
-    wlogout
-    adwaita-icon-theme
-    kdePackages.dolphin
-    easyeffects
-
-  ];
-
-  # NordVPN configuration
-  custom.services.nordvpn.enable = true;
-  users.groups.nordvpn.members = [profile.username];
 
   #################################
   ## Fonts

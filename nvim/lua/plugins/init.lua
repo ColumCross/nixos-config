@@ -13,6 +13,24 @@ return {
     end,
   },
 
+  {
+    "hrsh7th/nvim-cmp",
+    config = function(_, opts)
+      require("cmp").setup(opts)
+      require("cmp").setup.filetype("markdown", {
+        sources = {
+          { name = "async_path" },
+        },
+      })
+    end,
+  },
+
+  {
+    "bullets-vim/bullets.nvim",
+    ft = { "markdown", "text", "gitcommit" },
+    opts = {},
+  },
+
   -- test new blink
   -- { import = "nvchad.blink.lazyspec" },
 
