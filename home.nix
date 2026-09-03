@@ -664,9 +664,11 @@ let
 
     if [ "$NEW" = "dark" ]; then
       THEME_FILE=~/.config/kitty/theme-dark.conf
+      BTOP_THEME=Default
       WALLPAPER=${dark-wallpaper}
     else
       THEME_FILE=~/.config/kitty/theme-light.conf
+      BTOP_THEME=whiteout
       WALLPAPER=${light-wallpaper}
     fi
 
@@ -683,6 +685,16 @@ let
 
     mkdir -p "$(dirname "$STATE_FILE")"
     echo "$NEW" > "$STATE_FILE"
+
+    # Btop colors
+    BTOP_CONFIG="$HOME/.config/btop/btop.conf"
+    mkdir -p "$(dirname "$BTOP_CONFIG")"
+    if [ -f "$BTOP_CONFIG" ] && ${pkgs.gnugrep}/bin/grep -q '^color_theme[[:space:]]*=' "$BTOP_CONFIG"; then
+      ${pkgs.gnused}/bin/sed -i -E "s/^color_theme[[:space:]]*=.*/color_theme = \"$BTOP_THEME\"/" "$BTOP_CONFIG"
+    else
+      printf '\ncolor_theme = "%s"\n' "$BTOP_THEME" >> "$BTOP_CONFIG"
+    fi
+    ${pkgs.procps}/bin/pkill -SIGUSR2 -x btop || true
 
     # Kitty terminal colors
     ln -sf "$THEME_FILE" ~/.config/kitty/current-theme.conf
