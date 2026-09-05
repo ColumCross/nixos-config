@@ -665,10 +665,12 @@ let
     if [ "$NEW" = "dark" ]; then
       THEME_FILE=~/.config/kitty/theme-dark.conf
       BTOP_THEME=Default
+      KDE_COLOR_SCHEME=BreezeDark
       WALLPAPER=${dark-wallpaper}
     else
       THEME_FILE=~/.config/kitty/theme-light.conf
       BTOP_THEME=whiteout
+      KDE_COLOR_SCHEME=BreezeLight
       WALLPAPER=${light-wallpaper}
     fi
 
@@ -714,6 +716,9 @@ let
 
     # GTK / Electron / Libadwaita color scheme
     dconf write /org/gnome/desktop/interface/color-scheme "'prefer-$NEW'"
+
+    # Qt / KDE color scheme
+    ${pkgs.kdePackages.plasma-workspace}/bin/plasma-apply-colorscheme "$KDE_COLOR_SCHEME" >/dev/null 2>&1 || true
 
     # Waybar
     rm -f ~/.config/waybar/style.css ~/.config/waybar/style.css.backup
@@ -831,6 +836,18 @@ in
     EDITOR = "nvim";
     VISUAL = "nvim";
     NIXOS_OZONE_WL = "1";
+  };
+
+  qt = {
+    enable = true;
+    platformTheme = {
+      name = "kde";
+      package = [
+        pkgs.kdePackages.plasma-integration
+        pkgs.kdePackages.plasma-integration.qt5
+      ];
+    };
+    style.name = "breeze";
   };
 
   home.packages = [
