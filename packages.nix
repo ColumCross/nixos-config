@@ -1,4 +1,4 @@
-{ pkgs, profile, unstablePkgs, ... }:
+{ pkgs, profile, spotifyPlayerPackage, ... }:
 
 {
   environment.systemPackages = with pkgs; [
@@ -34,7 +34,7 @@
     hyprlock
     dunst
     libnotify
-    unstablePkgs.spotify-player
+    spotifyPlayerPackage
     blueman
     wlogout
     adwaita-icon-theme

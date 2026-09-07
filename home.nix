@@ -22,6 +22,12 @@ let
     '';
   };
 
+  active-sleep-inhibit = pkgs.replaceVars ./opencode/plugins/active-sleep-inhibit.js {
+    systemdInhibit = "${pkgs.systemd}/bin/systemd-inhibit";
+    bash = "${pkgs.bash}/bin/bash";
+    sleep = "${pkgs.coreutils}/bin/sleep";
+  };
+
   # ==========================================
   # Theme definitions
   # ==========================================
@@ -1024,7 +1030,6 @@ in
       exec-once = [
         "nm-applet"
         "blueman-applet"
-        "hypridle"
         "set-theme dark"
       ];
 
@@ -1383,6 +1388,7 @@ in
         lock_cmd = "pidof hyprlock || hyprlock";
         before_sleep_cmd = "loginctl lock-session";
         after_sleep_cmd = "hyprctl dispatch dpms on";
+        ignore_systemd_inhibit = false;
       };
 
       listener = [
@@ -1698,6 +1704,9 @@ in
         sound = true;
       };
     };
+    "opencode/plugins/active-sleep-inhibit.js".source = active-sleep-inhibit;
+
+    "spotify-player/app.toml".source = ./spotify-player/app.toml;
 
     "easyeffects/output/HB-Mid.json".source = rabcor-hb-mid;
   };

@@ -11,6 +11,10 @@
     opencode.url = "github:anomalyco/opencode";
     hyprKCS.url = "github:kosa12/hyprKCS";
     fast.url = "github:maaslalani/fast";
+    spotify-player = {
+      url = "github:aome510/spotify-player/6f94188ed6aae0d9c2cfecc25a434fc36a322df5";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
     nordvpn-module = {
       url = "git+file:///etc/nixos-modules/nix_modules";
       flake = false;
@@ -31,6 +35,7 @@
     opencode,
     hyprKCS,
     fast,
+    spotify-player,
     nordvpn-module,
     ...
   }:
@@ -47,11 +52,12 @@
       inherit system;
       config.allowUnfree = true;
     };
+    spotifyPlayerPackage = spotify-player.defaultPackage.${system};
   in {
     nixosConfigurations.${profile.flakeName} = nixpkgs.lib.nixosSystem {
       inherit system;
 
-      specialArgs = { inherit profile unstablePkgs nordvpn-module; };
+      specialArgs = { inherit profile unstablePkgs nordvpn-module spotifyPlayerPackage; };
 
 	pkgs = import nixpkgs {
 		inherit system;

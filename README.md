@@ -32,6 +32,9 @@ compatibility.
 |-- flake.lock
 |-- hardware-configuration.nix
 |-- home.nix
+|-- opencode/
+|   `-- plugins/
+|       `-- active-sleep-inhibit.js
 |-- AGENTS.md
 |-- README.md
 |-- patches/
@@ -56,8 +59,8 @@ packages and NordVPN configuration.
 
 `home.nix` owns the user's shell, desktop session, theme switcher, workspace
 controller, Waybar, Dunst, Hyprpaper, Hypridle, Hyprlock, Rofi, Kitty, Neovim
-mappings, and wrapper scripts. The tracked Waybar patch adds the GTK drag/drop
-hook used by the workspace controller.
+mappings, OpenCode plugin deployment, and wrapper scripts. The tracked Waybar
+patch adds the GTK drag/drop hook used by the workspace controller.
 
 `hardware-configuration.nix` is generated for this machine and should not be
 edited manually.
@@ -156,7 +159,7 @@ The rebuild shortcut intentionally invokes the `rebuild-nixos` wrapper. This
 keeps the flake reference out of the Hyprland bind value, where `#` would be
 interpreted as the start of a comment.
 
-## Theme Switcher
+# Theme Switcher
 
 The desktop has explicit target and toggle commands:
 
@@ -254,6 +257,34 @@ uses a collision-free temporary name, and verifies the final ID-to-name mapping.
 If a rename fails or the process is interrupted, it restores and verifies the
 original mapping before reporting success; an incomplete rollback is reported
 explicitly through Dunst. Successful reorders are intentionally silent.
+
+# OpenCode Active Sleep Inhibition
+
+The tracked OpenCode plugin at `opencode/plugins/active-sleep-inhibit.js` is
+deployed by Home Manager to
+`~/.config/opencode/plugins/active-sleep-inhibit.js`. Nix substitutes the
+plugin's runtime commands with immutable store paths, so it has no npm
+dependencies or manually managed home-directory source files.
+
+Each OpenCode session independently owns a systemd block inhibitor while its
+status is `busy` or `retry`. A session releases only its own inhibitor after it
+becomes `idle`; concurrent active sessions therefore remain protected until
+each one finishes. Permission and question prompts remain `busy`, so the laptop
+does not lock or suspend while OpenCode waits for a response.
+
+The plugin uses `systemd-inhibit --what=idle:sleep --mode=block`, which pauses
+Hypridle's normal idle actions and blocks system sleep. Every inhibitor has a
+parent-process watchdog and normal plugin shutdown releases all remaining
+inhibitors, preventing an OpenCode crash from leaving a permanent lock.
+
+Inspect the active inhibitors with:
+
+```sh
+systemd-inhibit --list
+```
+
+After activating a new Home Manager generation, restart OpenCode so it loads
+the updated plugin.
 
 ## Notifications
 
