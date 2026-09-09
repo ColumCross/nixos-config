@@ -296,6 +296,13 @@ The sound rule applies to all Dunst notifications, including screenshot and
 theme-error notifications. Theme-switch completion notifications are disabled;
 this does not disable Dunst or sounds for other notifications.
 
+The bell button beside Waybar's volume control toggles notification sounds for
+the current graphical session. It changes only the Dunst sound hook: visual
+notifications remain visible, and media, application, microphone, and system
+audio are unaffected. OpenCode keeps its visual attention notifications but
+uses this same Dunst-controlled sound path rather than a separate TUI sound.
+The setting defaults to enabled and resets after logout or reboot.
+
 ## Neovim And NVChad
 
 Home Manager enables Neovim for the executable, editor defaults, and language

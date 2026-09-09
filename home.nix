@@ -22,6 +22,38 @@ let
     '';
   };
 
+  notification-sound-control = pkgs.writeShellApplication {
+    name = "notification-sound-control";
+    runtimeInputs = [ pkgs.coreutils pkgs.pipewire ];
+    text = ''
+      STATE_FILE="$XDG_RUNTIME_DIR/notification-sound-muted"
+
+      case "''${1:-status}" in
+        play)
+          [ -f "$STATE_FILE" ] && exit 0
+          pw-play --volume 0.5 ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/message-new-instant.oga >/dev/null 2>&1 &
+          ;;
+        toggle)
+          if [ -f "$STATE_FILE" ]; then
+            rm -f "$STATE_FILE"
+          else
+            touch "$STATE_FILE"
+          fi
+          ;;
+        status)
+          if [ -f "$STATE_FILE" ]; then
+            printf '%s\n' '{"text":"󰂛","tooltip":"Notification sounds: muted","class":"muted"}'
+          else
+            printf '%s\n' '{"text":"󰂚","tooltip":"Notification sounds: enabled","class":"enabled"}'
+          fi
+          ;;
+        *)
+          exit 2
+          ;;
+      esac
+    '';
+  };
+
   active-sleep-inhibit = pkgs.replaceVars ./opencode/plugins/active-sleep-inhibit.js {
     systemdInhibit = "${pkgs.systemd}/bin/systemd-inhibit";
     bash = "${pkgs.bash}/bin/bash";
@@ -114,7 +146,7 @@ let
     }
 
     #clock, #battery, #cpu, #memory, #backlight, #disk, #network,
-    #bluetooth, #pulseaudio, #wireplumber, #custom-media, #tray,
+    #bluetooth, #pulseaudio, #wireplumber, #custom-media, #custom-notification-sound, #tray,
     #mode, #scratchpad, #power-profiles-daemon, #mpd, #language,
     #keyboard-state, #privacy-item {
       padding: ${waybarModuleVerticalPadding} 12px;
@@ -159,6 +191,8 @@ let
     #bluetooth.off, #bluetooth.disabled { color: @red; }
     #pulseaudio { color: @teal-light; }
     #pulseaudio.muted { color: @grey; }
+    #custom-notification-sound { color: @teal-light; }
+    #custom-notification-sound.muted { color: @grey; }
     #wireplumber { color: @pink; }
     #wireplumber.muted { color: @red; }
     #custom-media { color: @green; }
@@ -256,7 +290,7 @@ let
     }
 
     #clock, #battery, #cpu, #memory, #backlight, #disk, #network,
-    #bluetooth, #pulseaudio, #wireplumber, #custom-media, #tray,
+    #bluetooth, #pulseaudio, #wireplumber, #custom-media, #custom-notification-sound, #tray,
     #mode, #scratchpad, #power-profiles-daemon, #mpd, #language,
     #keyboard-state, #privacy-item {
       padding: ${waybarModuleVerticalPadding} 12px;
@@ -301,6 +335,8 @@ let
     #bluetooth.off, #bluetooth.disabled { color: @red; }
     #pulseaudio { color: @teal-light; }
     #pulseaudio.muted { color: @grey; }
+    #custom-notification-sound { color: @teal-light; }
+    #custom-notification-sound.muted { color: @grey; }
     #wireplumber { color: @pink; }
     #wireplumber.muted { color: @red; }
     #custom-media { color: @green; }
@@ -863,6 +899,7 @@ in
     toggle-theme
     brightness-adjust
     workspace-control
+    notification-sound-control
     (pkgs.writeShellScriptBin "rebuild-nixos" ''
       sudo nixos-rebuild switch --flake "${flakeReference}"
       echo ""
@@ -1176,6 +1213,7 @@ in
           "backlight"
           "custom/sep4"
           "pulseaudio"
+          "custom/notification-sound"
           "custom/sep5"
           "battery"
           "custom/sep6"
@@ -1219,6 +1257,14 @@ in
             default = [ "" "" "" ];
           };
           on-click = "pavucontrol";
+        };
+
+        "custom/notification-sound" = {
+          exec = "notification-sound-control status";
+          return-type = "json";
+          interval = "once";
+          exec-on-event = true;
+          on-click = "notification-sound-control toggle";
         };
 
         network = {
@@ -1363,9 +1409,7 @@ in
       };
 
       notification-sound = {
-        script = "${pkgs.writeShellScript "dunst-notification-sound" ''
-          ${pkgs.pipewire}/bin/pw-play --volume 0.5 ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/message-new-instant.oga >/dev/null 2>&1 &
-        ''}";
+        script = "${notification-sound-control}/bin/notification-sound-control play";
       };
     };
   };
@@ -1701,7 +1745,7 @@ in
       attention = {
         enabled = true;
         notifications = true;
-        sound = true;
+        sound = false;
       };
     };
     "opencode/plugins/active-sleep-inhibit.js".source = active-sleep-inhibit;
