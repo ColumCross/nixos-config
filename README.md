@@ -342,8 +342,14 @@ the plugin's other default list and checkbox mappings remain available.
 
 ## EasyEffects
 
-EasyEffects starts with no active preset. The Nix-managed `HB-Mid` output preset
-remains available for manual selection in the application.
+EasyEffects runs hidden as a background PipeWire service with an empty,
+audio-transparent pipeline. It starts with no active preset and does not use
+global bypass, avoiding its unreliable idle/resume behavior.
+
+The Nix-managed `HB-Mid` output preset remains available for manual selection
+in the application. A manually selected preset remains active only for the
+current EasyEffects service lifetime: restarting EasyEffects or the machine
+always clears the preset and restores the empty pipeline.
 
 ## Rebuild And Update Workflow
 

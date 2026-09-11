@@ -1,14 +1,10 @@
 # =========================
 # home.nix
 # =========================
-{ config, pkgs, profile, ... }:
+{ config, lib, pkgs, profile, ... }:
 
 let
   flakeReference = "${profile.configDirectory}#${profile.flakeName}";
-
-  patched-waybar = pkgs.waybar.overrideAttrs (old: {
-    patches = (old.patches or []) ++ [ ./patches/waybar-hyprland-workspace-dnd.patch ];
-  });
 
   workspace-control = pkgs.writeShellApplication {
     name = "workspace-control";
@@ -77,564 +73,27 @@ let
     sleep = "${pkgs.coreutils}/bin/sleep";
   };
 
-  /* Theme definitions moved to home/theming.
-
-  dark-wallpaper = ./wallpapers/nix-dark.png;
-  light-wallpaper = ./wallpapers/nix-bright.png;
-
-  waybarHeight = 30;
-  waybarFontSize = "16.25px";
-  waybarBorderWidth = "2px";
-  waybarButtonRadius = "5px";
-  waybarModuleVerticalPadding = "1.25px";
-  waybarWorkspaceVerticalPadding = "5px";
-  waybarClockLetterSpacing = "1.25px";
-  waybarTrayIconSize = 20;
-
-  waybar-dark-css = ''
-    @define-color teal #00ffff;
-    @define-color teal-dim #00cccc;
-    @define-color teal-light #00ffd5;
-    @define-color green #00ff9f;
-    @define-color pink #ff33cc;
-    @define-color red #ff0080;
-    @define-color orange #ff4d00;
-    @define-color yellow #ffff00;
-    @define-color purple #bd00ff;
-    @define-color blue #00b8ff;
-    @define-color grey #888888;
-    @define-color gold #ffcc00;
-    @define-color black #000000;
-    @define-color black-gradient #0a0a0a;
-
-    * {
-      font-family: 'JetBrainsMono Nerd Font', 'JetBrains Mono', 'Noto Sans Mono', 'Font Awesome 6 Free', 'Font Awesome 6 Brands', monospace;
-      font-size: ${waybarFontSize};
-      font-weight: 500;
-    }
-
-    window#waybar {
-      background: linear-gradient(180deg, @black 0%, @black-gradient 100%);
-      border-bottom: ${waybarBorderWidth} solid @teal;
-      box-shadow: 0 0 25px @teal;
-      color: @teal;
-      transition-property: background-color, border-color, box-shadow;
-      transition-duration: 0.3s;
-      border-radius: 0 0;
-    }
-
-    window#waybar.hidden { opacity: 0.2; }
-    window#waybar.empty { background-color: transparent; }
-    window#waybar.solo { background-color: @black; border: ${waybarBorderWidth} solid @teal; }
-
-    button {
-      border: none;
-      border-radius: ${waybarButtonRadius};
-      background: rgba(0, 255, 255, 0.1);
-      color: @teal;
-    }
-    button:hover {
-      background: rgba(0, 255, 255, 0.2);
-      box-shadow: 0 0 18.75px @teal;
-    }
-
-    #workspaces button {
-      padding: ${waybarWorkspaceVerticalPadding} 8px;
-      margin: 0 4px;
-      background: transparent;
-      color: @teal-dim;
-      border: none;
-    }
-    #workspaces button:hover { color: @teal; }
-    #workspaces button.active { color: #B91C1C; font-weight: bold; }
-    #workspaces button.urgent { color: @pink; }
-    #workspaces button.dragging { opacity: 0.45; }
-    #workspaces button.drop-before {
-      color: @yellow;
-      background: rgba(255, 255, 0, 0.14);
-      box-shadow: inset 3px 0 @yellow;
-    }
-    #workspaces button.drop-after {
-      color: @yellow;
-      background: rgba(255, 255, 0, 0.14);
-      box-shadow: inset -3px 0 @yellow;
-    }
-
-    #clock, #battery, #cpu, #memory, #backlight, #disk, #network,
-    #bluetooth, #pulseaudio, #wireplumber, #custom-media, #custom-notification-sound, #tray,
-    #mode, #scratchpad, #power-profiles-daemon, #mpd, #language,
-    #keyboard-state, #privacy-item {
-      padding: ${waybarModuleVerticalPadding} 12px;
-      margin: 0;
-      background: transparent;
-      border: none;
-      color: @teal;
-    }
-
-    #window, #workspaces { margin: 0 4px; }
-
-    #custom-sep1, #custom-sep2, #custom-sep3, #custom-sep4,
-    #custom-sep5, #custom-sep6, #custom-sep7 {
-      color: @teal;
-      opacity: 0.4;
-      padding: 0 4px;
-      margin: 0;
-    }
-
-    #custom-power {
-      color: @red;
-      padding: ${waybarModuleVerticalPadding} 12px;
-      margin: 0;
-    }
-    #custom-power:hover {
-      color: @pink;
-      text-shadow: 0 0 12.5px @pink;
-    }
-
-    #cpu { color: @teal; }
-    #memory { color: @purple; }
-    #disk { color: @orange; }
-    #backlight { color: @yellow; }
-    #battery { color: @green; }
-    #battery.charging, #battery.plugged { color: @green; }
-    #battery.critical:not(.charging) { color: @red; }
-    #battery.warning:not(.charging) { color: @orange; }
-    #network { color: @teal; }
-    #network.disconnected { color: @red; }
-    #bluetooth { color: @teal; }
-    #bluetooth.connected { color: @green; }
-    #bluetooth.off, #bluetooth.disabled { color: @red; }
-    #pulseaudio { color: @teal-light; }
-    #pulseaudio.muted { color: @grey; }
-    #custom-notification-sound { color: @teal-light; }
-    #custom-notification-sound.muted { color: @grey; }
-    #wireplumber { color: @pink; }
-    #wireplumber.muted { color: @red; }
-    #custom-media { color: @green; }
-    #mpd { color: @green; }
-    #mpd.disconnected { color: @red; }
-    #mpd.stopped { color: @grey; }
-    #mpd.paused { color: @gold; }
-    #clock { font-weight: bold; letter-spacing: ${waybarClockLetterSpacing}; color: @teal-light; }
-    #temperature.critical { color: @red; }
-    #custom-weather { color: @blue; }
-    #tray { color: @teal; }
-    #tray > .passive { opacity: 0.5; }
-    #tray > .needs-attention { color: @pink; }
-    #idle_inhibitor { color: @teal; }
-    #idle_inhibitor.activated { color: @green; }
-    #language { min-width: 16px; padding: 4px 8px; }
-    #keyboard-state { color: @teal-light; padding: 4px 0px; min-width: 16px; }
-    #keyboard-state > label.locked { color: @pink; }
-    #scratchpad { color: @teal; }
-    #scratchpad.empty { color: rgba(0, 255, 255, 0.3); }
-    #mode { color: @pink; font-weight: bold; }
-    #privacy { padding: 0; }
-    #privacy-item.screenshare { color: @orange; }
-    #privacy-item.audio-in { color: @green; }
-    #privacy-item.audio-out { color: @teal; }
-  '';
-
-  waybar-light-css = ''
-    @define-color teal #0077aa;
-    @define-color teal-dim #006699;
-    @define-color teal-light #0088bb;
-    @define-color green #00aa55;
-    @define-color pink #aa0088;
-    @define-color red #cc0044;
-    @define-color orange #cc5500;
-    @define-color yellow #aa8800;
-    @define-color purple #8800aa;
-    @define-color blue #0088cc;
-    @define-color grey #666666;
-    @define-color gold #aa8800;
-    @define-color black #ffffff;
-    @define-color black-gradient #f5f5f5;
-
-    * {
-      font-family: 'JetBrainsMono Nerd Font', 'JetBrains Mono', 'Noto Sans Mono', 'Font Awesome 6 Free', 'Font Awesome 6 Brands', monospace;
-      font-size: ${waybarFontSize};
-      font-weight: 500;
-    }
-
-    window#waybar {
-      background: linear-gradient(180deg, @black 0%, @black-gradient 100%);
-      border-bottom: ${waybarBorderWidth} solid @teal;
-      box-shadow: 0 2.5px 10px rgba(0, 0, 0, 0.15);
-      color: @teal;
-      transition-property: background-color, border-color, box-shadow;
-      transition-duration: 0.3s;
-      border-radius: 0 0;
-    }
-
-    window#waybar.hidden { opacity: 0.2; }
-    window#waybar.empty { background-color: transparent; }
-    window#waybar.solo { background-color: @black; border: ${waybarBorderWidth} solid @teal; }
-
-    button {
-      border: none;
-      border-radius: ${waybarButtonRadius};
-      background: rgba(0, 119, 170, 0.1);
-      color: @teal;
-    }
-    button:hover {
-      background: rgba(0, 119, 170, 0.2);
-      box-shadow: 0 0 10px rgba(0, 119, 170, 0.3);
-    }
-
-    #workspaces button {
-      padding: ${waybarWorkspaceVerticalPadding} 8px;
-      margin: 0 4px;
-      background: transparent;
-      color: @teal-dim;
-      border: none;
-    }
-    #workspaces button:hover { color: @teal; }
-    #workspaces button.active { color: #B91C1C; font-weight: bold; }
-    #workspaces button.urgent { color: @pink; }
-    #workspaces button.dragging { opacity: 0.45; }
-    #workspaces button.drop-before {
-      color: @yellow;
-      background: rgba(170, 136, 0, 0.14);
-      box-shadow: inset 3px 0 @yellow;
-    }
-    #workspaces button.drop-after {
-      color: @yellow;
-      background: rgba(170, 136, 0, 0.14);
-      box-shadow: inset -3px 0 @yellow;
-    }
-
-    #clock, #battery, #cpu, #memory, #backlight, #disk, #network,
-    #bluetooth, #pulseaudio, #wireplumber, #custom-media, #custom-notification-sound, #tray,
-    #mode, #scratchpad, #power-profiles-daemon, #mpd, #language,
-    #keyboard-state, #privacy-item {
-      padding: ${waybarModuleVerticalPadding} 12px;
-      margin: 0;
-      background: transparent;
-      border: none;
-      color: @teal;
-    }
-
-    #window, #workspaces { margin: 0 4px; }
-
-    #custom-sep1, #custom-sep2, #custom-sep3, #custom-sep4,
-    #custom-sep5, #custom-sep6, #custom-sep7 {
-      color: @teal;
-      opacity: 0.4;
-      padding: 0 4px;
-      margin: 0;
-    }
-
-    #custom-power {
-      color: @red;
-      padding: ${waybarModuleVerticalPadding} 12px;
-      margin: 0;
-    }
-    #custom-power:hover {
-      color: @pink;
-      text-shadow: 0 0 10px @pink;
-    }
-
-    #cpu { color: @teal; }
-    #memory { color: @purple; }
-    #disk { color: @orange; }
-    #backlight { color: @yellow; }
-    #battery { color: @green; }
-    #battery.charging, #battery.plugged { color: @green; }
-    #battery.critical:not(.charging) { color: @red; }
-    #battery.warning:not(.charging) { color: @orange; }
-    #network { color: @teal; }
-    #network.disconnected { color: @red; }
-    #bluetooth { color: @teal; }
-    #bluetooth.connected { color: @green; }
-    #bluetooth.off, #bluetooth.disabled { color: @red; }
-    #pulseaudio { color: @teal-light; }
-    #pulseaudio.muted { color: @grey; }
-    #custom-notification-sound { color: @teal-light; }
-    #custom-notification-sound.muted { color: @grey; }
-    #wireplumber { color: @pink; }
-    #wireplumber.muted { color: @red; }
-    #custom-media { color: @green; }
-    #mpd { color: @green; }
-    #mpd.disconnected { color: @red; }
-    #mpd.stopped { color: @grey; }
-    #mpd.paused { color: @gold; }
-    #clock { font-weight: bold; letter-spacing: ${waybarClockLetterSpacing}; color: @teal-light; }
-    #temperature.critical { color: @red; }
-    #custom-weather { color: @blue; }
-    #tray { color: @teal; }
-    #tray > .passive { opacity: 0.5; }
-    #tray > .needs-attention { color: @pink; }
-    #idle_inhibitor { color: @teal; }
-    #idle_inhibitor.activated { color: @green; }
-    #language { min-width: 16px; padding: 4px 8px; }
-    #keyboard-state { color: @teal-light; padding: 4px 0px; min-width: 16px; }
-    #keyboard-state > label.locked { color: @pink; }
-    #scratchpad { color: @teal; }
-    #scratchpad.empty { color: rgba(0, 119, 170, 0.3); }
-    #mode { color: @pink; font-weight: bold; }
-    #privacy { padding: 0; }
-    #privacy-item.screenshare { color: @orange; }
-    #privacy-item.audio-in { color: @green; }
-    #privacy-item.audio-out { color: @teal; }
-  '';
-
-  dunst-light-overrides = ''
-    [global]
-    frame_color = "#d8dee9"
-
-    [urgency_low]
-    background = "#d8dee9"
-    foreground = "#2e3440"
-
-    [urgency_normal]
-    background = "#e5e9f0"
-    foreground = "#2e3440"
-
-    [urgency_critical]
-    background = "#bf616a"
-    foreground = "#eceff4"
-  '';
-
-  rofi-dark-config = ''
-    configuration {
-      display-drun: "Apps";
-      drun-display-format: "{name}";
-      font: "JetBrains Mono 12";
-    }
-
-    @theme "~/.config/rofi/themes/black-neon.rasi"
-  '';
-
-  rofi-light-config = ''
-    configuration {
-      display-drun: "Apps";
-      drun-display-format: "{name}";
-      font: "JetBrains Mono 12";
-    }
-
-    @theme "~/.config/rofi/themes/light-neon.rasi"
-  '';
-
-  wlogout-icons = "${pkgs.wlogout}/share/wlogout/icons";
-
   rabcor-hb-mid = pkgs.fetchurl {
     url = "https://raw.githubusercontent.com/Rabcor/Heavy-Bass-EE/3d5471a728eded83b165905a92cd959415eda1f4/HB-Mid.json";
     hash = "sha256-0eIReSFJKQNWiG/mUmmgC8od9TCWckIrMnH/9Y55cgA=";
   };
 
-  wlogout-dark-css = ''
-    * {
-      background-image: none;
-      box-shadow: none;
-    }
-    window {
-      background-color: rgba(12, 12, 12, 0.9);
-      color: #ffffff;
-    }
-    button {
-      background-color: #1E1E1E;
-      color: #ffffff;
-      border: 1px solid #33ccff;
-      border-radius: 0;
-      margin: 5px;
-      padding: 10px 30px;
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: 25%;
-    }
-    button:hover, button:focus {
-      background-color: rgba(51, 204, 255, 0.2);
-      box-shadow: 0 0 15px rgba(51, 204, 255, 0.3);
-      color: #33ccff;
-    }
-    button:active {
-      background-color: rgba(51, 204, 255, 0.35);
-      color: #33ccff;
-    }
-    #lock      { background-image: image(url("${wlogout-icons}/lock.png")); }
-    #logout    { background-image: image(url("${wlogout-icons}/logout.png")); }
-    #suspend   { background-image: image(url("${wlogout-icons}/suspend.png")); }
-    #hibernate { background-image: image(url("${wlogout-icons}/hibernate.png")); }
-    #shutdown  { background-image: image(url("${wlogout-icons}/shutdown.png")); }
-    #reboot    { background-image: image(url("${wlogout-icons}/reboot.png")); }
+  easyeffects-reset = pkgs.writeShellScript "easyeffects-reset" ''
+    set -eu
+
+    config_dir="''${XDG_CONFIG_HOME:-$HOME/.config}/easyeffects/db"
+    config_file="$config_dir/easyeffectsrc"
+
+    ${pkgs.coreutils}/bin/mkdir -p "$config_dir"
+
+    ${pkgs.kdePackages.kconfig}/bin/kwriteconfig6 --file "$config_file" --group Presets --key lastLoadedInputPreset --delete
+    ${pkgs.kdePackages.kconfig}/bin/kwriteconfig6 --file "$config_file" --group Presets --key lastLoadedOutputPreset --delete
+    ${pkgs.kdePackages.kconfig}/bin/kwriteconfig6 --file "$config_file" --group Presets --key lastLoadedInputCommunityPackage --delete
+    ${pkgs.kdePackages.kconfig}/bin/kwriteconfig6 --file "$config_file" --group Presets --key lastLoadedOutputCommunityPackage --delete
+    ${pkgs.kdePackages.kconfig}/bin/kwriteconfig6 --file "$config_file" --group StreamInputs --key plugins --delete
+    ${pkgs.kdePackages.kconfig}/bin/kwriteconfig6 --file "$config_file" --group StreamOutputs --key plugins --delete
+    ${pkgs.kdePackages.kconfig}/bin/kwriteconfig6 --file "$config_file" --group EffectsPipelines --key bypass --delete
   '';
-
-  wlogout-light-css = ''
-    * {
-      background-image: none;
-      box-shadow: none;
-    }
-    window {
-      background-color: rgba(248, 248, 242, 0.95);
-      color: #282a36;
-    }
-    button {
-      background-color: #eaecee;
-      color: #282a36;
-      border: 1px solid #0077aa;
-      border-radius: 0;
-      margin: 5px;
-      padding: 10px 30px;
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: 25%;
-    }
-    button:hover, button:focus {
-      background-color: rgba(0, 119, 170, 0.15);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      color: #0077aa;
-    }
-    button:active {
-      background-color: rgba(0, 119, 170, 0.3);
-      color: #0077aa;
-    }
-    #lock      { background-image: image(url("${wlogout-icons}/lock.png")); }
-    #logout    { background-image: image(url("${wlogout-icons}/logout.png")); }
-    #suspend   { background-image: image(url("${wlogout-icons}/suspend.png")); }
-    #hibernate { background-image: image(url("${wlogout-icons}/hibernate.png")); }
-    #shutdown  { background-image: image(url("${wlogout-icons}/shutdown.png")); }
-    #reboot    { background-image: image(url("${wlogout-icons}/reboot.png")); }
-  '';
-
-  # ==========================================
-  # Toggle theme script
-  # ==========================================
-  set-theme = pkgs.writeShellScriptBin "set-theme" ''
-    NEW="$1"
-    STATE_FILE="$HOME/.cache/current-theme"
-
-    case "$NEW" in
-      dark|light) ;;
-      *)
-        exit 2
-        ;;
-    esac
-
-    if [ "$NEW" = "dark" ]; then
-      THEME_FILE=~/.config/kitty/theme-dark.conf
-      BTOP_THEME=Default
-      KDE_COLOR_SCHEME=BreezeDark
-      WALLPAPER=${dark-wallpaper}
-    else
-      THEME_FILE=~/.config/kitty/theme-light.conf
-      BTOP_THEME=whiteout
-      KDE_COLOR_SCHEME=BreezeLight
-      WALLPAPER=${light-wallpaper}
-    fi
-
-    # Do not commit shared state until the upgraded wallpaper IPC succeeds.
-    ATTEMPT=0
-    until hyprctl hyprpaper wallpaper ",$WALLPAPER,cover"; do
-      ATTEMPT=$((ATTEMPT + 1))
-      if [ "$ATTEMPT" -ge 20 ]; then
-        notify-send "Theme" "Could not switch the wallpaper"
-        exit 1
-      fi
-      sleep 0.25
-    done
-
-    mkdir -p "$(dirname "$STATE_FILE")"
-    echo "$NEW" > "$STATE_FILE"
-
-    # Btop colors
-    BTOP_CONFIG="$HOME/.config/btop/btop.conf"
-    mkdir -p "$(dirname "$BTOP_CONFIG")"
-    if [ -f "$BTOP_CONFIG" ] && ${pkgs.gnugrep}/bin/grep -q '^color_theme[[:space:]]*=' "$BTOP_CONFIG"; then
-      ${pkgs.gnused}/bin/sed -i -E "s/^color_theme[[:space:]]*=.[*]/color_theme = \"$BTOP_THEME\"/" "$BTOP_CONFIG"
-    else
-      printf '\ncolor_theme = "%s"\n' "$BTOP_THEME" >> "$BTOP_CONFIG"
-    fi
-    ${pkgs.procps}/bin/pkill -SIGUSR2 -x btop || true
-
-    # Kitty terminal colors
-    ln -sf "$THEME_FILE" ~/.config/kitty/current-theme.conf
-    for socket in /tmp/kittyrcontrol-*; do
-      [ -S "$socket" ] || continue
-      kitten @ --to "unix:$socket" set-colors --all --configured "$THEME_FILE" 2>/dev/null || true
-    done
-
-    # Hyprland border colors
-    if [ "$NEW" = "dark" ]; then
-      hyprctl keyword general:col.active_border "rgba(11d424ff) rgba(0e8a1aff) 45deg"
-      hyprctl keyword general:col.inactive_border "rgba(00ffffff) rgba(0055ffff) 45deg"
-    else
-      hyprctl keyword general:col.active_border "rgba(11d424ff) rgba(0e8a1aff) 45deg"
-      hyprctl keyword general:col.inactive_border "rgba(00ffffff) rgba(0055ffff) 45deg"
-    fi
-
-    # GTK / Electron / Libadwaita color scheme
-    dconf write /org/gnome/desktop/interface/color-scheme "'prefer-$NEW'"
-
-    # Qt / KDE color scheme
-    ${pkgs.kdePackages.plasma-workspace}/bin/plasma-apply-colorscheme "$KDE_COLOR_SCHEME" >/dev/null 2>&1 || true
-
-    # Waybar
-    rm -f ~/.config/waybar/style.css ~/.config/waybar/style.css.backup
-    if [ "$NEW" = "dark" ]; then
-      cat > ~/.config/waybar/style.css << 'WAYBAREOF'
-    ${waybar-dark-css}
-    WAYBAREOF
-    else
-      cat > ~/.config/waybar/style.css << 'WAYBAREOF'
-    ${waybar-light-css}
-    WAYBAREOF
-    fi
-    pkill -SIGUSR2 waybar || true
-
-    # Dunst
-    mkdir -p ~/.config/dunst/dunstrc.d
-    if [ "$NEW" = "dark" ]; then
-      rm -f ~/.config/dunst/dunstrc.d/10-theme.conf
-    else
-      cat > ~/.config/dunst/dunstrc.d/10-theme.conf << 'DUNSTEOF'
-    ${dunst-light-overrides}
-    DUNSTEOF
-    fi
-    dunstctl reload || true
-
-    # Rofi
-    rm -f ~/.config/rofi/config.rasi ~/.config/rofi/config.rasi.backup
-    if [ "$NEW" = "dark" ]; then
-      cat > ~/.config/rofi/config.rasi << 'ROFIEOF'
-    ${rofi-dark-config}
-    ROFIEOF
-    else
-      cat > ~/.config/rofi/config.rasi << 'ROFIEOF'
-    ${rofi-light-config}
-    ROFIEOF
-    fi
-
-    # wlogout CSS
-    mkdir -p ~/.config/wlogout
-    if [ "$NEW" = "dark" ]; then
-      cat > ~/.config/wlogout/style.css << 'WLOGOUTEOF'
-    ${wlogout-dark-css}
-    WLOGOUTEOF
-    else
-      cat > ~/.config/wlogout/style.css << 'WLOGOUTEOF'
-    ${wlogout-light-css}
-    WLOGOUTEOF
-    fi
-
-  '';
-
-  toggle-theme = pkgs.writeShellScriptBin "toggle-theme" ''
-    STATE_FILE="$HOME/.cache/current-theme"
-
-    if [ -f "$STATE_FILE" ] && [ "$(cat "$STATE_FILE")" = "dark" ]; then
-      exec set-theme light
-    fi
-
-    exec set-theme dark
-  '';
-
-  */
-
-  rabcor-hb-mid = pkgs.fetchurl {
-    url = "https://raw.githubusercontent.com/Rabcor/Heavy-Bass-EE/3d5471a728eded83b165905a92cd959415eda1f4/HB-Mid.json";
-    hash = "sha256-0eIReSFJKQNWiG/mUmmgC8od9TCWckIrMnH/9Y55cgA=";
-  };
 
   # Brightness adjustment logic
   # Brightness buttons increase or decrease in different increments if above or below a cutoff point
@@ -668,9 +127,16 @@ let
     esac
   '';
 
+  # Keybindings
+  hyprlandKeybindings = import ./hyprland/keybindings.nix;
+
 in
 {
-  imports = [ ./home/theming ];
+  imports = [ 
+    ./home/theming
+    ./home/waybar
+  ];
+
 
   home.username = profile.username;
   home.homeDirectory = profile.homeDirectory;
@@ -705,7 +171,22 @@ in
 
   services.easyeffects = {
     enable = true;
+    preset = "";
   };
+
+  systemd.user.services.easyeffects.Service.ExecStartPre = easyeffects-reset;
+
+  home.activation.easyeffectsHBMidMigration = lib.hm.dag.entryBefore [ "linkGeneration" ] ''
+    remove_if_managed_hb_mid() {
+      if [ -e "$1" ] && ${pkgs.coreutils}/bin/cmp -s "$1" ${rabcor-hb-mid}; then
+        ${pkgs.coreutils}/bin/rm -f "$1"
+      fi
+    }
+
+    remove_if_managed_hb_mid "$HOME/.config/easyeffects/output/HB-Mid.json"
+    remove_if_managed_hb_mid "$HOME/.local/share/easyeffects/output/HB-Mid.json"
+    remove_if_managed_hb_mid "$HOME/.local/share/easyeffects/output/HB-Mid.json.backup"
+  '';
 
   programs.git = {
     enable = true;
@@ -849,103 +330,7 @@ in
         "blueman-applet"
       ];
 
-      bind = [
-        "$mainMod, T, exec, $terminal"
-        "$mainMod, SPACE, exec, $menu"
-        "$mainMod, D, exec, discord"
-        "$mainMod, Q, killactive,"
-        "$mainMod SHIFT, Q, exit,"
-        "$mainMod, V, togglefloating,"
-        "$mainMod, F, fullscreen"
-        "$mainMod, P, pseudo,"
-        "$mainMod, N, layoutmsg, togglesplit"
-        "$mainMod SHIFT, L, exec, hyprlock"
-        "$mainMod, slash, exec, hyprkcs"
-        "$mainMod, O, exec, $terminal opencode"
-
-        # Rebuild NixOS
-        "$mainMod CTRL SHIFT, R, exec, kitty --class nixos-rebuild -e rebuild-nixos"
-
-        # OpenCode in the configured NixOS directory
-        "$mainMod CTRL, C, exec, kitty --class opencode -e opencode-nixos"
-
-        # Neovim in the configured NixOS directory
-        "$mainMod CTRL SHIFT, C, exec, kitty --class neovim-edit -e nvim-nixos"
-
-        # Applications
-        "$mainMod, B, exec, blueman-manager"
-        "$mainMod, W, exec, google-chrome-stable"
-
-        # Screenshots
-        "CTRL SHIFT, 4, exec, grim -g \"$(slurp)\" - | wl-copy && notify-send \"Screenshot copied to clipboard\""
-        "CTRL SHIFT, 5, exec, grim - | wl-copy && notify-send \"Full screenshot copied to clipboard\""
-
-        # Vim-style focus
-        "$mainMod, H, movefocus, l"
-        "$mainMod, J, movefocus, d"
-        "$mainMod, K, movefocus, u"
-        "$mainMod, L, movefocus, r"
-
-        # Workspaces 1-10 follow the current visible numbering
-        "$mainMod, 1, exec, workspace-control focus 1"
-        "$mainMod, 2, exec, workspace-control focus 2"
-        "$mainMod, 3, exec, workspace-control focus 3"
-        "$mainMod, 4, exec, workspace-control focus 4"
-        "$mainMod, 5, exec, workspace-control focus 5"
-        "$mainMod, 6, exec, workspace-control focus 6"
-        "$mainMod, 7, exec, workspace-control focus 7"
-        "$mainMod, 8, exec, workspace-control focus 8"
-        "$mainMod, 9, exec, workspace-control focus 9"
-        "$mainMod, 0, exec, workspace-control focus 10"
-
-        # Move window to workspace
-        "$mainMod SHIFT, 1, exec, workspace-control move 1"
-        "$mainMod SHIFT, 2, exec, workspace-control move 2"
-        "$mainMod SHIFT, 3, exec, workspace-control move 3"
-        "$mainMod SHIFT, 4, exec, workspace-control move 4"
-        "$mainMod SHIFT, 5, exec, workspace-control move 5"
-        "$mainMod SHIFT, 6, exec, workspace-control move 6"
-        "$mainMod SHIFT, 7, exec, workspace-control move 7"
-        "$mainMod SHIFT, 8, exec, workspace-control move 8"
-        "$mainMod SHIFT, 9, exec, workspace-control move 9"
-        "$mainMod SHIFT, 0, exec, workspace-control move 10"
-
-        # Navigate workspaces by their current visible order
-        "$mainMod, left, exec, workspace-control cycle previous"
-        "$mainMod, right, exec, workspace-control cycle next"
-        "$mainMod SHIFT, left, exec, workspace-control move-relative previous"
-        "$mainMod SHIFT, right, exec, workspace-control move-relative next"
-        "$mainMod SHIFT ALT, left, exec, workspace-control shift previous"
-        "$mainMod SHIFT ALT, right, exec, workspace-control shift next"
-      ];
-
-      bindel = [
-        # Media keys
-        ", XF86AudioRaiseVolume, exec, wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 1%+"
-        ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%-"
-      ];
-
-      bindl = [
-        ", switch:on:Lid Switch, exec, ~/.config/hypr/lid_handler.sh close"
-        ", switch:off:Lid Switch, exec, ~/.config/hypr/lid_handler.sh open"
-
-        ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-        ", XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
-        ", XF86MonBrightnessUp, exec, brightness-adjust up"
-        ", XF86MonBrightnessDown, exec, brightness-adjust down"
-
-        # Media player
-        ", XF86AudioPlay, exec, playerctl play-pause"
-        ", XF86AudioNext, exec, playerctl next"
-        ", XF86AudioPrev, exec, playerctl previous"
-      ];
-
-      bindm = [
-        "$mainMod, mouse:272, movewindow"
-        "$mainMod, mouse:273, resizewindow"
-        "ALT, mouse:272, movewindow"
-        "ALT CTRL, mouse:272, resizewindow"
-      ];
+      inherit (hyprlandKeybindings) bind bindel bindl bindm;
 
       windowrule = [
         "match:class .*, suppress_event maximize"
@@ -956,149 +341,6 @@ in
         "match:class ^(hyprkcs)$, float true, center true, size 889 854"
         "match:class ^(kitty)$, rounding 5, suppress_event fullscreen"
       ];
-    };
-  };
-
-  # ==========================================
-  # Waybar
-  # ==========================================
-  programs.waybar = {
-    enable = true;
-    package = patched-waybar;
-    systemd = {
-      enable = true;
-      targets = [ "hyprland-session.target" ];
-    };
-    settings = {
-      mainBar = {
-        layer = "top";
-        position = "top";
-        spacing = 2;
-
-        modules-left = [ "hyprland/workspaces" ];
-        modules-center = [];
-        modules-right = [
-          "network"
-          "bluetooth"
-          "custom/sep1"
-          "cpu"
-          "custom/sep2"
-          "memory"
-          "custom/sep3"
-          "backlight"
-          "custom/sep4"
-          "pulseaudio"
-          "custom/notification-sound"
-          "custom/sep5"
-          "battery"
-          "custom/sep6"
-          "clock"
-          "tray"
-          "custom/power"
-        ];
-
-        "hyprland/workspaces" = {
-          format = "{name}";
-          on-click = "activate";
-          on-drop = "workspace-control reorder {source} {target} {placement}";
-          sort-by = "number";
-        };
-
-        clock = {
-          format = "{:%m/%d %I:%M %p}";
-          format-alt = "{:%Y-%m-%d}";
-          tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
-          interval = 60;
-        };
-
-        cpu = {
-          format = "CPU {usage:02}% ";
-          tooltip = true;
-          tooltip-format = "CPU Usage: {usage}%\nCores: {avg_frequency} GHz";
-          interval = 2;
-        };
-
-        memory = {
-          format = "MEM {}% ";
-          tooltip = true;
-          tooltip-format = "Memory: {used:.1f}GB/{total:.1f}GB\nSwap: {swapUsed:.1f}GB/{swapTotal:.1f}GB";
-          interval = 5;
-        };
-
-        pulseaudio = {
-          format = "󰕾 {volume}%";
-          format-muted = "󰝟 muted";
-          format-icons = {
-            default = [ "" "" "" ];
-          };
-          on-click = "launch-pavucontrol";
-        };
-
-        "custom/notification-sound" = {
-          exec = "notification-sound-control status";
-          return-type = "json";
-          interval = "once";
-          exec-on-event = true;
-          on-click = "notification-sound-control toggle";
-        };
-
-        network = {
-          format = "{icon} {essid}";
-          format-ethernet = "{icon} {ipaddr}";
-          format-linked = "{icon} {ifname}";
-          format-disconnected = "󰤭";
-          format-icons = ["󰤯" "󰤟" "󰤢" "󰤥" "󰤨"];
-          tooltip = true;
-          tooltip-format = "{ifname} via {gwaddr}";
-          tooltip-format-wifi = "{essid} ({signalStrength}%)\nFrequency: {frequency}MHz\nIP: {ipaddr}";
-          tooltip-format-ethernet = "{ifname}\nIP: {ipaddr}\nGateway: {gwaddr}";
-          tooltip-format-disconnected = "Disconnected";
-          on-click = "networkmanager_dmenu";
-          interval = 10;
-        };
-
-        bluetooth = {
-          format = "󰂯";
-          format-connected = "󰂱 {num_connections}";
-          format-disabled = "󰂲";
-          tooltip-format = "{controller_alias}\n{device_enumerate}";
-          on-click = "blueman-manager";
-        };
-
-        battery = {
-          states = {
-            warning = 30;
-            critical = 15;
-          };
-          format = "BAT {capacity}%";
-          format-charging = "BAT {capacity}% 󰂄";
-          format-plugged = "BAT {capacity}% 󰂄";
-          format-icons = [ "" "" "" "" "" ];
-        };
-
-        backlight = {
-          format = "󰃠 {percent}%";
-          interval = 2;
-        };
-
-        tray = {
-          show-passive-items = true;
-          spacing = 8;
-        };
-
-        "custom/sep1" = { format = "|"; tooltip = false; };
-        "custom/sep2" = { format = "|"; tooltip = false; };
-        "custom/sep3" = { format = "|"; tooltip = false; };
-        "custom/sep4" = { format = "|"; tooltip = false; };
-        "custom/sep5" = { format = "|"; tooltip = false; };
-        "custom/sep6" = { format = "|"; tooltip = false; };
-
-        "custom/power" = {
-          format = "⏻";
-          tooltip = false;
-          on-click = "wlogout -p layer-shell";
-        };
-      };
     };
   };
 
@@ -1270,183 +512,6 @@ in
     };
   };
 
-  /* Rofi theme files moved to home/theming.
-  xdg.configFile."rofi/config.rasi".text = ''
-    configuration {
-      display-drun: "Apps";
-      drun-display-format: "{name}";
-      font: "JetBrains Mono 12";
-    }
-
-    @theme "~/.config/rofi/themes/black-neon.rasi"
-  '';
-
-  xdg.configFile."rofi/themes/black-neon.rasi".text = ''
-    * {
-        background: #000000;
-        foreground: #00ffff;
-        selected-background: #00ffff33;
-        selected-foreground: #00ffff;
-        border-color: #00ffff;
-
-        background-color: transparent;
-        text-color: @foreground;
-
-        margin: 0px;
-        padding: 0px;
-        spacing: 0px;
-    }
-
-    window {
-        background-color: @background;
-        border: 2px;
-        border-color: @border-color;
-        border-radius: 0px;
-        width: 960px;
-        height: 540px;
-        padding: 10px;
-    }
-
-    mainbox {
-        children: [inputbar, listview];
-        background-color: transparent;
-    }
-
-    inputbar {
-        children: [prompt, entry];
-        background-color: transparent;
-        border: 0px 0px 2px 0px;
-        border-color: @border-color;
-        padding: 10px;
-        margin: 0px 0px 10px 0px;
-    }
-
-    prompt {
-        text-color: @foreground;
-        padding: 0px 10px 0px 0px;
-    }
-
-    entry {
-        placeholder: "Search...";
-        placeholder-color: #555555;
-        text-color: @foreground;
-    }
-
-    listview {
-        lines: 10;
-        columns: 1;
-        scrollbar: false;
-    }
-
-    element {
-        padding: 8px;
-        border-radius: 0px;
-    }
-
-    element selected {
-        background-color: transparent;
-        text-color: @selected-foreground;
-        border: 2px;
-        border-color: @selected-foreground;
-    }
-
-    element-text {
-        background-color: transparent;
-        text-color: inherit;
-        vertical-align: 0.5;
-    }
-
-    element-icon {
-        size: 24px;
-        padding: 0px 10px 0px 0px;
-        background-color: transparent;
-    }
-  '';
-
-  xdg.configFile."rofi/themes/light-neon.rasi".text = ''
-    * {
-        background: #ffffff;
-        foreground: #282a36;
-        selected-background: #0077aa33;
-        selected-foreground: #0077aa;
-        border-color: #0077aa;
-
-        background-color: transparent;
-        text-color: @foreground;
-
-        margin: 0px;
-        padding: 0px;
-        spacing: 0px;
-    }
-
-    window {
-        background-color: @background;
-        border: 2px;
-        border-color: @border-color;
-        border-radius: 0px;
-        width: 960px;
-        height: 540px;
-        padding: 10px;
-    }
-
-    mainbox {
-        children: [inputbar, listview];
-        background-color: transparent;
-    }
-
-    inputbar {
-        children: [prompt, entry];
-        background-color: transparent;
-        border: 0px 0px 2px 0px;
-        border-color: @border-color;
-        padding: 10px;
-        margin: 0px 0px 10px 0px;
-    }
-
-    prompt {
-        text-color: @foreground;
-        padding: 0px 10px 0px 0px;
-    }
-
-    entry {
-        placeholder: "Search...";
-        placeholder-color: #aaaaaa;
-        text-color: @foreground;
-    }
-
-    listview {
-        lines: 10;
-        columns: 1;
-        scrollbar: false;
-    }
-
-    element {
-        padding: 8px;
-        border-radius: 0px;
-    }
-
-    element selected {
-        background-color: transparent;
-        text-color: @selected-foreground;
-        border: 2px;
-        border-color: @selected-foreground;
-    }
-
-    element-text {
-        background-color: transparent;
-        text-color: inherit;
-        vertical-align: 0.5;
-    }
-
-    element-icon {
-        size: 24px;
-        padding: 0px 10px 0px 0px;
-        background-color: transparent;
-    }
-  '';
-
-  */
-
   # ==========================================
   # Lid handler
   # ==========================================
@@ -1491,6 +556,7 @@ in
 
     "spotify-player/app.toml".source = ./spotify-player/app.toml;
 
-    "easyeffects/output/HB-Mid.json".source = rabcor-hb-mid;
   };
+
+  xdg.dataFile."easyeffects/output/HB-Mid.json".source = rabcor-hb-mid;
 }
