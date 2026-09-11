@@ -62,6 +62,15 @@ let
     '';
   };
 
+  rebuild-nixos = pkgs.writeShellApplication {
+    name = "rebuild-nixos";
+    runtimeInputs = [ pkgs.coreutils pkgs.gnugrep pkgs.nixos-rebuild pkgs.sudo pkgs.wl-clipboard ];
+    text = builtins.replaceStrings
+      [ "@flakeReference@" ]
+      [ flakeReference ]
+      (builtins.readFile ./scripts/rebuild-nixos.sh);
+  };
+
   active-sleep-inhibit = pkgs.replaceVars ./opencode/plugins/active-sleep-inhibit.js {
     systemdInhibit = "${pkgs.systemd}/bin/systemd-inhibit";
     bash = "${pkgs.bash}/bin/bash";
@@ -681,12 +690,7 @@ in
     brightness-adjust
     workspace-control
     notification-sound-control
-    (pkgs.writeShellScriptBin "rebuild-nixos" ''
-      sudo nixos-rebuild switch --flake "${flakeReference}"
-      echo ""
-      echo "Press any key to close..."
-      read -n 1
-    '')
+    rebuild-nixos
     (pkgs.writeShellScriptBin "opencode-nixos" ''
       cd "${profile.configDirectory}"
       exec opencode

@@ -74,6 +74,7 @@
 	    ];
 	  })
         ./configuration.nix
+        ./modules/gtk4-color-scheme.nix
 
         home-manager.nixosModules.home-manager
 

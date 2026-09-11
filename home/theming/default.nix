@@ -19,7 +19,7 @@ in {
     style.name = "breeze";
   };
 
-  home.packages = [ switcher.set-theme switcher.toggle-theme ];
+  home.packages = [ pkgs.gnome-themes-extra switcher.set-theme switcher.toggle-theme ];
 
   programs.kitty.settings = {
     allow_remote_control = "yes";
@@ -79,6 +79,15 @@ in {
     if [ -f "$HOME/.cache/current-theme" ] && [ "$(cat "$HOME/.cache/current-theme")" = light ]; then
       selector_theme=light
     fi
+    if [ "$selector_theme" = dark ]; then
+      color_scheme=prefer-dark
+      gtk_theme=Adwaita-dark
+    else
+      color_scheme=prefer-light
+      gtk_theme=Adwaita
+    fi
+    $DRY_RUN_CMD ${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/gtk-theme "'$gtk_theme'"
+    $DRY_RUN_CMD ${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/color-scheme "'$color_scheme'"
     $DRY_RUN_CMD ln -sfnT "$selector_theme.css" "$HOME/.config/waybar/styles/current.css"
     $DRY_RUN_CMD ln -sfnT "$selector_theme.conf" "$HOME/.config/dunst/dunstrc.d/current-theme.conf"
     $DRY_RUN_CMD ln -sfnT "$selector_theme.rasi" "$HOME/.config/rofi/themes/current.rasi"

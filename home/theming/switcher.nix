@@ -21,12 +21,14 @@ let
           kitty_theme="$HOME/.config/kitty/theme-dark.conf"
           btop_theme=Default
           kde_color_scheme=BreezeDark
+          gtk_theme=Adwaita-dark
           wallpaper=${darkWallpaper}
           ;;
         light)
           kitty_theme="$HOME/.config/kitty/theme-light.conf"
           btop_theme=whiteout
           kde_color_scheme=BreezeLight
+          gtk_theme=Adwaita
           wallpaper=${lightWallpaper}
           ;;
         *) exit 2 ;;
@@ -62,6 +64,7 @@ let
 
       hyprctl keyword general:col.active_border "rgba(11d424ff) rgba(0e8a1aff) 45deg"
       hyprctl keyword general:col.inactive_border "rgba(00ffffff) rgba(0055ffff) 45deg"
+      dconf write /org/gnome/desktop/interface/gtk-theme "'$gtk_theme'"
       dconf write /org/gnome/desktop/interface/color-scheme "'prefer-$new'"
       ${pkgs.kdePackages.plasma-workspace}/bin/plasma-apply-colorscheme "$kde_color_scheme" >/dev/null 2>&1 || true
 
