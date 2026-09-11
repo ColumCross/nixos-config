@@ -32,6 +32,8 @@ compatibility.
 |-- flake.lock
 |-- hardware-configuration.nix
 |-- home.nix
+|-- home/
+|   `-- theming/
 |-- opencode/
 |   `-- plugins/
 |       `-- active-sleep-inhibit.js
@@ -57,10 +59,12 @@ compatibility.
 Bluetooth, greetd, portals, and Hyprland enablement. `packages.nix` owns system
 packages and NordVPN configuration.
 
-`home.nix` owns the user's shell, desktop session, theme switcher, workspace
-controller, Waybar, Dunst, Hyprpaper, Hypridle, Hyprlock, Rofi, Kitty, Neovim
-mappings, OpenCode plugin deployment, and wrapper scripts. The tracked Waybar
-patch adds the GTK drag/drop hook used by the workspace controller.
+`home.nix` owns the user's shell, desktop session, workspace controller, Waybar
+modules, Dunst behavior, Hypridle, Hyprlock, Rofi launch behavior, Kitty,
+Neovim mappings, OpenCode plugin deployment, and wrapper scripts.
+`home/theming` owns dynamic appearance variants, Hyprpaper, theme-specific
+desktop integrations, and the theme switcher. The tracked Waybar patch adds the
+GTK drag/drop hook used by the workspace controller.
 
 `hardware-configuration.nix` is generated for this machine and should not be
 edited manually.
@@ -184,6 +188,7 @@ Each theme application updates:
 - Rofi styling
 - GTK4 styling used by hyprKCS
 - Wlogout styling
+- Neovim's active NVChad palette
 
 The wallpapers are Nix-managed assets:
 
@@ -197,6 +202,12 @@ current Hyprpaper wallpaper command with cover fit mode and retries while the
 service starts. It commits the new shared state only after the wallpaper switch
 succeeds. A persistent wallpaper failure produces a Dunst notification; normal
 successful switches are intentionally silent.
+
+Home Manager owns immutable dark and light variants for Waybar, Dunst, Rofi,
+and Wlogout under `~/.config`. The switcher owns only their small `current`
+selector symlinks, allowing it to switch themes without rewriting Nix-managed
+style content. The shared state file remains `~/.cache/current-theme` so
+Neovim and other consumers can update independently.
 
 Kitty's palette files are user-owned files at:
 
@@ -404,8 +415,8 @@ If the desktop theme is incomplete, run an explicit target first:
 set-theme dark
 ```
 
-Then verify Hyprpaper, Waybar, Dunst, and Kitty individually. The theme state
-file is `~/.cache/current-theme`.
+Then verify Hyprpaper, Waybar, Dunst, Kitty, Rofi, Wlogout, and Neovim
+individually. The theme state file is `~/.cache/current-theme`.
 
 If Lazy cannot update its lock file, verify that
 `~/.config/nvim/lazy-lock.json` resolves to the tracked file in `/etc/nixos`,

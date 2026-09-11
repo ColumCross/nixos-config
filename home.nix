@@ -68,9 +68,7 @@ let
     sleep = "${pkgs.coreutils}/bin/sleep";
   };
 
-  # ==========================================
-  # Theme definitions
-  # ==========================================
+  /* Theme definitions moved to home/theming.
 
   dark-wallpaper = ./wallpapers/nix-dark.png;
   light-wallpaper = ./wallpapers/nix-bright.png;
@@ -534,7 +532,7 @@ let
     BTOP_CONFIG="$HOME/.config/btop/btop.conf"
     mkdir -p "$(dirname "$BTOP_CONFIG")"
     if [ -f "$BTOP_CONFIG" ] && ${pkgs.gnugrep}/bin/grep -q '^color_theme[[:space:]]*=' "$BTOP_CONFIG"; then
-      ${pkgs.gnused}/bin/sed -i -E "s/^color_theme[[:space:]]*=.*/color_theme = \"$BTOP_THEME\"/" "$BTOP_CONFIG"
+      ${pkgs.gnused}/bin/sed -i -E "s/^color_theme[[:space:]]*=.[*]/color_theme = \"$BTOP_THEME\"/" "$BTOP_CONFIG"
     else
       printf '\ncolor_theme = "%s"\n' "$BTOP_THEME" >> "$BTOP_CONFIG"
     fi
@@ -622,6 +620,13 @@ let
     exec set-theme dark
   '';
 
+  */
+
+  rabcor-hb-mid = pkgs.fetchurl {
+    url = "https://raw.githubusercontent.com/Rabcor/Heavy-Bass-EE/3d5471a728eded83b165905a92cd959415eda1f4/HB-Mid.json";
+    hash = "sha256-0eIReSFJKQNWiG/mUmmgC8od9TCWckIrMnH/9Y55cgA=";
+  };
+
   # Brightness adjustment logic
   # Brightness buttons increase or decrease in different increments if above or below a cutoff point
   brightness-adjust = pkgs.writeShellScriptBin "brightness-adjust" ''
@@ -656,6 +661,8 @@ let
 
 in
 {
+  imports = [ ./home/theming ];
+
   home.username = profile.username;
   home.homeDirectory = profile.homeDirectory;
 
@@ -667,23 +674,9 @@ in
     NIXOS_OZONE_WL = "1";
   };
 
-  qt = {
-    enable = true;
-    platformTheme = {
-      name = "kde";
-      package = [
-        pkgs.kdePackages.plasma-integration
-        pkgs.kdePackages.plasma-integration.qt5
-      ];
-    };
-    style.name = "breeze";
-  };
-
   home.packages = [
     pkgs.networkmanager_dmenu
     pkgs.sound-theme-freedesktop
-    set-theme
-    toggle-theme
     launch-pavucontrol
     brightness-adjust
     workspace-control
@@ -722,11 +715,8 @@ in
       size = 12;
     };
     settings = {
-      allow_remote_control = "yes";
-      listen_on = "unix:/tmp/kittyrcontrol";
       window_padding_width = 4;
       background_opacity = "1.0";
-      "include" = "~/.config/kitty/current-theme.conf";
     };
   };
 
@@ -783,8 +773,6 @@ in
         gaps_in = 2;
         gaps_out = 5;
         border_size = 2;
-        "col.active_border" = "rgba(11d424ff) rgba(0e8a1aff) 45deg";
-        "col.inactive_border" = "rgba(00ffffff) rgba(0055ffff) 45deg";
         resize_on_border = false;
         allow_tearing = false;
         layout = "dwindle";
@@ -855,7 +843,6 @@ in
       exec-once = [
         "nm-applet"
         "blueman-applet"
-        "set-theme dark"
       ];
 
       bind = [
@@ -871,9 +858,6 @@ in
         "$mainMod SHIFT, L, exec, hyprlock"
         "$mainMod, slash, exec, hyprkcs"
         "$mainMod, O, exec, $terminal opencode"
-
-        # Toggle theme
-        "$mainMod ALT, L, exec, toggle-theme"
 
         # Rebuild NixOS
         "$mainMod CTRL SHIFT, R, exec, kitty --class nixos-rebuild -e rebuild-nixos"
@@ -985,7 +969,6 @@ in
       mainBar = {
         layer = "top";
         position = "top";
-        height = waybarHeight;
         spacing = 2;
 
         modules-left = [ "hyprland/workspaces" ];
@@ -1095,7 +1078,6 @@ in
         };
 
         tray = {
-          icon-size = waybarTrayIconSize;
           show-passive-items = true;
           spacing = 8;
         };
@@ -1113,25 +1095,6 @@ in
           on-click = "wlogout -p layer-shell";
         };
       };
-    };
-    style = waybar-dark-css;
-  };
-
-  # ==========================================
-  # hyprpaper
-  # ==========================================
-  services.hyprpaper = {
-    enable = true;
-    settings = {
-      ipc = true;
-      splash = false;
-      wallpaper = [
-        {
-          monitor = "";
-          path = "${dark-wallpaper}";
-          fit_mode = "cover";
-        }
-      ];
     };
   };
 
@@ -1153,7 +1116,6 @@ in
         padding = 8;
         horizontal_padding = 8;
         frame_width = 2;
-        frame_color = "#3b4252";
         separator_color = "frame";
         font = "JetBrains Mono 10";
         markup = "full";
@@ -1178,23 +1140,11 @@ in
         transparency = 20;
       };
 
-      urgency_low = {
-        background = "#3b4252";
-        foreground = "#d8dee9";
-        timeout = 3;
-      };
+      urgency_low.timeout = 3;
 
-      urgency_normal = {
-        background = "#434c5e";
-        foreground = "#eceff4";
-        timeout = 5;
-      };
+      urgency_normal.timeout = 5;
 
-      urgency_critical = {
-        background = "#bf616a";
-        foreground = "#eceff4";
-        timeout = 0;
-      };
+      urgency_critical.timeout = 0;
 
       notification-sound = {
         script = "${notification-sound-control}/bin/notification-sound-control play";
@@ -1316,9 +1266,7 @@ in
     };
   };
 
-  # ==========================================
-  # Rofi
-  # ==========================================
+  /* Rofi theme files moved to home/theming.
   xdg.configFile."rofi/config.rasi".text = ''
     configuration {
       display-drun: "Apps";
@@ -1492,6 +1440,8 @@ in
         background-color: transparent;
     }
   '';
+
+  */
 
   # ==========================================
   # Lid handler
