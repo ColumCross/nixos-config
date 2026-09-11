@@ -54,6 +54,14 @@ let
     '';
   };
 
+  launch-pavucontrol = pkgs.writeShellApplication {
+    name = "launch-pavucontrol";
+    runtimeInputs = [ pkgs.pavucontrol pkgs.systemd ];
+    text = ''
+      exec systemd-run --user --collect --quiet --service-type=exec pavucontrol
+    '';
+  };
+
   active-sleep-inhibit = pkgs.replaceVars ./opencode/plugins/active-sleep-inhibit.js {
     systemdInhibit = "${pkgs.systemd}/bin/systemd-inhibit";
     bash = "${pkgs.bash}/bin/bash";
@@ -401,214 +409,6 @@ let
     @theme "~/.config/rofi/themes/light-neon.rasi"
   '';
 
-  gtk4-dark-css = ''
-    window {
-      background-color: #000000;
-      color: #ffffff;
-      font-family: 'JetBrainsMono Nerd Font', monospace;
-      font-size: 13px;
-      border: none;
-      border-radius: 0;
-    }
-    label { color: #ffffff; }
-    titlebar, headerbar {
-      background-color: #000000;
-      color: #ffffff;
-      border-bottom: 2px solid #ffffff;
-      border-radius: 0;
-      box-shadow: none;
-    }
-    button {
-      background-color: transparent;
-      color: #ffffff;
-      border: 1px solid #ffffff;
-      border-radius: 0;
-      padding: 4px 12px;
-      box-shadow: none;
-    }
-    button:hover {
-      background-color: rgba(255, 255, 255, 0.15);
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-    }
-    button:active, button:checked {
-      background-color: rgba(255, 255, 255, 0.25);
-    }
-    box.key {
-      background-color: rgba(255, 255, 255, 0.08);
-      color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 0;
-    }
-    box.key:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-      border-color: #ffffff;
-    }
-    box.key.active {
-      background-color: rgba(255, 255, 255, 0.3);
-      border-color: #ffffff;
-      color: #ffffff;
-    }
-    list { background-color: #000000; }
-    row {
-      background-color: #000000;
-      color: #ffffff;
-      padding: 4px 8px;
-    }
-    row:selected { background-color: rgba(255, 255, 255, 0.15); }
-    row:hover { background-color: rgba(255, 255, 255, 0.08); }
-    separator {
-      background-color: rgba(255, 255, 255, 0.2);
-      min-height: 1px;
-    }
-    scrollbar { background-color: transparent; }
-    scrollbar slider {
-      background-color: rgba(255, 255, 255, 0.3);
-      border-radius: 0;
-      min-width: 6px;
-      min-height: 6px;
-    }
-    scrollbar slider:hover { background-color: #ffffff; }
-    entry {
-      background-color: rgba(255, 255, 255, 0.05);
-      color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 0;
-      caret-color: #ffffff;
-    }
-    entry:focus { border-color: #ffffff; }
-    check, radio {
-      background-color: transparent;
-      color: #ffffff;
-      border: 1px solid #ffffff;
-      border-radius: 0;
-    }
-    check:checked, radio:checked {
-      background-color: #ffffff;
-      color: #000000;
-    }
-    tooltip {
-      background-color: #000000;
-      color: #ffffff;
-      border: 1px solid #ffffff;
-      border-radius: 0;
-    }
-    popover, dialog {
-      background-color: #000000;
-      color: #ffffff;
-      border: 1px solid #ffffff;
-      border-radius: 0;
-    }
-    .sidebar {
-      background-color: #000000;
-      border-right: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    .dim-label { color: rgba(255, 255, 255, 0.4); }
-  '';
-
-  gtk4-light-css = ''
-    window {
-      background-color: #ffffff;
-      color: #282a36;
-      font-family: 'JetBrainsMono Nerd Font', monospace;
-      font-size: 13px;
-      border: none;
-      border-radius: 0;
-    }
-    label { color: #282a36; }
-    titlebar, headerbar {
-      background-color: #ffffff;
-      color: #282a36;
-      border-bottom: 2px solid #282a36;
-      border-radius: 0;
-      box-shadow: none;
-    }
-    button {
-      background-color: transparent;
-      color: #282a36;
-      border: 1px solid #282a36;
-      border-radius: 0;
-      padding: 4px 12px;
-      box-shadow: none;
-    }
-    button:hover {
-      background-color: rgba(40, 42, 54, 0.1);
-      box-shadow: 0 0 8px rgba(40, 42, 54, 0.15);
-    }
-    button:active, button:checked {
-      background-color: rgba(40, 42, 54, 0.2);
-    }
-    box.key {
-      background-color: rgba(40, 42, 54, 0.05);
-      color: #282a36;
-      border: 1px solid rgba(40, 42, 54, 0.2);
-      border-radius: 0;
-    }
-    box.key:hover {
-      background-color: rgba(40, 42, 54, 0.1);
-      border-color: #282a36;
-    }
-    box.key.active {
-      background-color: rgba(40, 42, 54, 0.2);
-      border-color: #282a36;
-      color: #282a36;
-    }
-    list { background-color: #ffffff; }
-    row {
-      background-color: #ffffff;
-      color: #282a36;
-      padding: 4px 8px;
-    }
-    row:selected { background-color: rgba(40, 42, 54, 0.1); }
-    row:hover { background-color: rgba(40, 42, 54, 0.05); }
-    separator {
-      background-color: rgba(40, 42, 54, 0.15);
-      min-height: 1px;
-    }
-    scrollbar { background-color: transparent; }
-    scrollbar slider {
-      background-color: rgba(40, 42, 54, 0.2);
-      border-radius: 0;
-      min-width: 6px;
-      min-height: 6px;
-    }
-    scrollbar slider:hover { background-color: #282a36; }
-    entry {
-      background-color: rgba(40, 42, 54, 0.05);
-      color: #282a36;
-      border: 1px solid rgba(40, 42, 54, 0.2);
-      border-radius: 0;
-      caret-color: #282a36;
-    }
-    entry:focus { border-color: #282a36; }
-    check, radio {
-      background-color: transparent;
-      color: #282a36;
-      border: 1px solid #282a36;
-      border-radius: 0;
-    }
-    check:checked, radio:checked {
-      background-color: #282a36;
-      color: #ffffff;
-    }
-    tooltip {
-      background-color: #ffffff;
-      color: #282a36;
-      border: 1px solid #282a36;
-      border-radius: 0;
-    }
-    popover, dialog {
-      background-color: #ffffff;
-      color: #282a36;
-      border: 1px solid #282a36;
-      border-radius: 0;
-    }
-    .sidebar {
-      background-color: #ffffff;
-      border-right: 1px solid rgba(40, 42, 54, 0.15);
-    }
-    .dim-label { color: rgba(40, 42, 54, 0.4); }
-  '';
-
   wlogout-icons = "${pkgs.wlogout}/share/wlogout/icons";
 
   rabcor-hb-mid = pkgs.fetchurl {
@@ -798,19 +598,6 @@ let
     ROFIEOF
     fi
 
-    # GTK4 CSS for hyprKCS
-    mkdir -p ~/.config/gtk-4.0
-    rm -f ~/.config/gtk-4.0/gtk.css ~/.config/gtk-4.0/gtk.css.backup
-    if [ "$NEW" = "dark" ]; then
-      cat > ~/.config/gtk-4.0/gtk.css << 'GTKEOF'
-    ${gtk4-dark-css}
-    GTKEOF
-    else
-      cat > ~/.config/gtk-4.0/gtk.css << 'GTKEOF'
-    ${gtk4-light-css}
-    GTKEOF
-    fi
-
     # wlogout CSS
     mkdir -p ~/.config/wlogout
     if [ "$NEW" = "dark" ]; then
@@ -897,6 +684,7 @@ in
     pkgs.sound-theme-freedesktop
     set-theme
     toggle-theme
+    launch-pavucontrol
     brightness-adjust
     workspace-control
     notification-sound-control
@@ -1256,7 +1044,7 @@ in
           format-icons = {
             default = [ "" "" "" ];
           };
-          on-click = "pavucontrol";
+          on-click = "launch-pavucontrol";
         };
 
         "custom/notification-sound" = {
@@ -1735,9 +1523,6 @@ in
     "nvim/lazy-lock.json".source = config.lib.file.mkOutOfStoreSymlink "${profile.configDirectory}/nvim/lazy-lock.json";
     "nvim/.stylua.toml".source = ./nvim/.stylua.toml;
     "nvim/lua".source = ./nvim/lua;
-
-    # GTK4 theme for hyprKCS
-    "gtk-4.0/gtk.css".text = gtk4-dark-css;
 
     # OpenCode TUI config
     "opencode/tui.json".text = builtins.toJSON {
