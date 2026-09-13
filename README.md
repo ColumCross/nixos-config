@@ -163,6 +163,42 @@ The rebuild shortcut intentionally invokes the `rebuild-nixos` wrapper. This
 keeps the flake reference out of the Hyprland bind value, where `#` would be
 interpreted as the start of a comment.
 
+### HP USB-C/A Universal Dock G2
+
+The HP USB-C/A Universal Dock G2 uses DisplayLink for its display outputs. The
+NixOS DisplayLink module loads the EVDI kernel module, installs the dock's udev
+rules and suspend hooks, and starts `dlm.service` at boot. This is separate from
+the laptop's Intel display driver; do not add Thunderbolt or Bolt configuration
+for this USB DisplayLink dock.
+
+The proprietary DisplayLink 6.2 driver archive is deliberately not committed.
+After cloning the repository, accept the Synaptics DisplayLink license and add
+the exact archive required by the locked Nixpkgs package:
+
+```sh
+nix-prefetch-url --name displaylink-620.zip \
+  "https://www.synaptics.com/sites/default/files/exe_files/2025-09/DisplayLink%20USB%20Graphics%20Software%20for%20Ubuntu6.2-EXE.zip"
+```
+
+With two external HP E243 displays attached, declarative Hyprland rules place
+the physical left display at the upper left, the physical right display to its
+right, and center the laptop panel below them. The external displays use their
+native `1920x1080@60` mode at scale `0.83`; the laptop panel remains at scale
+`1.00`. Workspace 1 is assigned to the physical left dock display. The generic
+Hyprland monitor rule remains as a fallback for undocked use and unexpected
+outputs.
+
+Closing the lid while an external display is active locks the session and
+disables the laptop panel without suspending. Opening it restores the panel to
+the docked layout when both external displays are present, or to `0x0` when
+undocked. USB keyboard and mouse devices are handled as normal HID devices.
+`input.left_handed = true` makes the physical right button the primary button
+for every pointer device, including the touchpad.
+
+NetworkManager automatically manages the dock's Ethernet adapter, while
+PipeWire discovers the dock's audio device. Use the existing Pavucontrol launch
+button in Waybar to select a preferred dock or monitor audio profile.
+
 # Theme Switcher
 
 The desktop has explicit target and toggle commands:

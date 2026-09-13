@@ -14,6 +14,11 @@
 
   services.logind.settings.Login.HandlePowerKey = "suspend";
 
+  # The HP USB-C/A Universal Dock G2 drives its external displays through
+  # DisplayLink. The NixOS module supplies EVDI, udev rules, and power hooks.
+  services.xserver.videoDrivers = [ "displaylink" "modesetting" ];
+  systemd.services.dlm.wantedBy = [ "multi-user.target" ];
+
   #################################
   ## Bootloader
   #################################

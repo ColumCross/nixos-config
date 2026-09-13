@@ -60,7 +60,7 @@ let
 
   rebuild-nixos = pkgs.writeShellApplication {
     name = "rebuild-nixos";
-    runtimeInputs = [ pkgs.coreutils pkgs.gnugrep pkgs.nixos-rebuild pkgs.sudo pkgs.wl-clipboard ];
+    runtimeInputs = [ pkgs.coreutils pkgs.gnugrep pkgs.nixos-rebuild pkgs.wl-clipboard ];
     text = builtins.replaceStrings
       [ "@flakeReference@" ]
       [ flakeReference ]
@@ -178,7 +178,7 @@ in
 
   home.activation.easyeffectsHBMidMigration = lib.hm.dag.entryBefore [ "linkGeneration" ] ''
     remove_if_managed_hb_mid() {
-      if [ -e "$1" ] && ${pkgs.coreutils}/bin/cmp -s "$1" ${rabcor-hb-mid}; then
+      if [ -e "$1" ] && ${pkgs.diffutils}/bin/cmp -s "$1" ${rabcor-hb-mid}; then
         ${pkgs.coreutils}/bin/rm -f "$1"
       fi
     }
@@ -238,7 +238,14 @@ in
       "$menu" = "rofi -show drun";
       "$fileManager" = "dolphin";
 
-      monitor = ",preferred,auto,1";
+      monitor = [
+        "desc:HP Inc. HP E243 CNC8501MRZ,1920x1080@60,0x0,0.8333333333333334"
+        "desc:HP Inc. HP E243 CNK828106Z,1920x1080@60,2304x0,0.8333333333333334"
+        "eDP-1,1920x1080@60,1344x1296,1"
+        ",preferred,auto,1"
+      ];
+
+      workspace = [ "1,monitor:desc:HP Inc. HP E243 CNC8501MRZ" ];
 
       env = [
         "XCURSOR_SIZE,24"
@@ -248,6 +255,7 @@ in
       input = {
         kb_layout = "us";
         follow_mouse = 1;
+        left_handed = true;
         touchpad = {
           natural_scroll = true;
           scroll_factor = 0.5;
@@ -521,8 +529,18 @@ in
       case "$1" in
           "close")
               pidof hyprlock || hyprlock
+              external_monitors=$(hyprctl monitors -j | ${pkgs.jq}/bin/jq '[.[] | select(.name != "eDP-1")] | length')
+              if [ "$external_monitors" -gt 0 ]; then
+                  hyprctl keyword monitor "eDP-1,disable"
+              fi
               ;;
           "open")
+              external_monitors=$(hyprctl monitors -j | ${pkgs.jq}/bin/jq '[.[] | select(.name != "eDP-1")] | length')
+              if [ "$external_monitors" -ge 2 ]; then
+                  hyprctl keyword monitor "eDP-1,1920x1080@60,1344x1296,1"
+              else
+                  hyprctl keyword monitor "eDP-1,preferred,0x0,1"
+              fi
               hyprctl dispatch dpms on
               ;;
           *)

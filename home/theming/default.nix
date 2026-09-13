@@ -86,8 +86,13 @@ in {
       color_scheme=prefer-light
       gtk_theme=Adwaita
     fi
-    $DRY_RUN_CMD ${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/gtk-theme "'$gtk_theme'"
-    $DRY_RUN_CMD ${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/color-scheme "'$color_scheme'"
+    if [ -v DBUS_SESSION_BUS_ADDRESS ]; then
+      $DRY_RUN_CMD ${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/gtk-theme "'$gtk_theme'"
+      $DRY_RUN_CMD ${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/color-scheme "'$color_scheme'"
+    else
+      $DRY_RUN_CMD ${pkgs.dbus}/bin/dbus-run-session -- ${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/gtk-theme "'$gtk_theme'"
+      $DRY_RUN_CMD ${pkgs.dbus}/bin/dbus-run-session -- ${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/color-scheme "'$color_scheme'"
+    fi
     $DRY_RUN_CMD ln -sfnT "$selector_theme.css" "$HOME/.config/waybar/styles/current.css"
     $DRY_RUN_CMD ln -sfnT "$selector_theme.conf" "$HOME/.config/dunst/dunstrc.d/current-theme.conf"
     $DRY_RUN_CMD ln -sfnT "$selector_theme.rasi" "$HOME/.config/rofi/themes/current.rasi"
