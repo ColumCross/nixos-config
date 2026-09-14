@@ -26,8 +26,6 @@ def sorted_numbered(workspaces):
     ids = [workspace["id"] for workspace in selected]
     if len(names) != len(set(names)) or len(ids) != len(set(ids)):
         raise WorkspaceError("Numbered desktops are not uniquely identified")
-    if [int(name) for name in names] != list(range(1, len(names) + 1)):
-        raise WorkspaceError("Numbered desktops must be consecutive from 1")
     return selected
 
 
@@ -49,10 +47,19 @@ def reordered_ids(workspaces, source_id, target_id, placement):
     return ids
 
 
+def names_for_order(workspaces, ordered_ids):
+    workspaces = sorted_numbered(workspaces)
+    original_ids = [workspace["id"] for workspace in workspaces]
+    if len(ordered_ids) != len(original_ids) or set(ordered_ids) != set(original_ids):
+        raise WorkspaceError("Desktop reorder does not match the current desktop set")
+    return dict(zip(ordered_ids, (workspace["name"] for workspace in workspaces)))
+
+
 def rename_steps(workspaces, source_id, target_id, placement, temporary_name):
     ordered = sorted_numbered(workspaces)
     original_ids = [workspace["id"] for workspace in ordered]
     final_ids = reordered_ids(workspaces, source_id, target_id, placement)
+    final_names = names_for_order(workspaces, final_ids)
     if original_ids == final_ids:
         return []
 
@@ -64,8 +71,9 @@ def rename_steps(workspaces, source_id, target_id, placement, temporary_name):
     else:
         affected = range(old_index - 1, new_index - 1, -1)
     for index in affected:
-        steps.append((original_ids[index], str(final_ids.index(original_ids[index]) + 1)))
-    steps.append((source_id, str(new_index + 1)))
+        workspace_id = original_ids[index]
+        steps.append((workspace_id, final_names[workspace_id]))
+    steps.append((source_id, final_names[source_id]))
     return steps
 
 
@@ -203,9 +211,16 @@ class Controller:
 
     def move_relative(self, direction):
         with self.lock():
-            adjacent = self.adjacent(direction)
-            if adjacent:
-                self.dispatch("movetoworkspace", f"name:{adjacent[1]['name']}")
+            if direction not in ("previous", "next"):
+                raise WorkspaceError("Invalid desktop direction")
+            workspaces = self.snapshot()
+            active_id = self.active_workspace()["id"]
+            active = next((workspace for workspace in workspaces if workspace["id"] == active_id), None)
+            if active is None:
+                raise WorkspaceError("The active desktop is not numbered")
+            destination = int(active["name"]) + (1 if direction == "next" else -1)
+            if 1 <= destination <= 10:
+                self.dispatch("movetoworkspace", f"name:{destination}")
 
     def shift(self, direction):
         with self.lock():
@@ -235,7 +250,7 @@ class Controller:
             for workspace_id, name in steps:
                 self.dispatch("renameworkspace", workspace_id, name)
                 mutated = True
-            self.verify_names({workspace_id: str(index + 1) for index, workspace_id in enumerate(final_ids)})
+            self.verify_names(names_for_order(workspaces, final_ids))
         except BaseException:
             if mutated:
                 try:
