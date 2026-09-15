@@ -5,11 +5,20 @@
 
 let
   flakeReference = "${profile.configDirectory}#${profile.flakeName}";
+  externalMonitorWidth = 1920;
+  externalMonitorHeight = 1080;
+  externalMonitorScale = 5.0 / 6.0;
+  externalMonitorMode = "${toString externalMonitorWidth}x${toString externalMonitorHeight}@60";
+  externalMonitorLogicalWidth = builtins.floor (externalMonitorWidth / externalMonitorScale);
+  externalMonitorLogicalHeight = builtins.floor (externalMonitorHeight / externalMonitorScale);
+  laptopPanelWidth = 1920;
+  laptopPanelHeight = 1080;
+  dockedLaptopX = builtins.floor ((2 * externalMonitorLogicalWidth - laptopPanelWidth) / 2);
+  dockedLaptopY = externalMonitorLogicalHeight;
 
   workspace-control = pkgs.writeShellApplication {
     name = "workspace-control";
     runtimeInputs = [
-      pkgs.hyprland
       pkgs.libnotify
       pkgs.python3
     ];
@@ -239,9 +248,9 @@ in
       "$fileManager" = "dolphin";
 
       monitor = [
-        "desc:HP Inc. HP E243 CNC8501MRZ,1920x1080@60,0x0,0.8333333333333334"
-        "desc:HP Inc. HP E243 CNK828106Z,1920x1080@60,2304x0,0.8333333333333334"
-        "eDP-1,1920x1080@60,1344x1296,1"
+        "desc:HP Inc. HP E243 CNC8501MRZ,${externalMonitorMode},0x0,${toString externalMonitorScale}"
+        "desc:HP Inc. HP E243 CNK828106Z,${externalMonitorMode},${toString externalMonitorLogicalWidth}x0,${toString externalMonitorScale}"
+        "eDP-1,${toString laptopPanelWidth}x${toString laptopPanelHeight}@60,${toString dockedLaptopX}x${toString dockedLaptopY},1"
         ",preferred,auto,1"
       ];
 
@@ -371,7 +380,7 @@ in
         horizontal_padding = 8;
         frame_width = 2;
         separator_color = "frame";
-        font = "JetBrains Mono 10";
+        font = "JetBrainsMono Nerd Font 10";
         markup = "full";
         format = "<b>%s</b>\\n%b";
         alignment = "left";
@@ -537,7 +546,7 @@ in
           "open")
               external_monitors=$(hyprctl monitors -j | ${pkgs.jq}/bin/jq '[.[] | select(.name != "eDP-1")] | length')
               if [ "$external_monitors" -ge 2 ]; then
-                  hyprctl keyword monitor "eDP-1,1920x1080@60,1344x1296,1"
+                  hyprctl keyword monitor "eDP-1,${toString laptopPanelWidth}x${toString laptopPanelHeight}@60,${toString dockedLaptopX}x${toString dockedLaptopY},1"
               else
                   hyprctl keyword monitor "eDP-1,preferred,0x0,1"
               fi

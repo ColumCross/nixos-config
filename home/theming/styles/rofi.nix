@@ -3,7 +3,7 @@
     configuration {
       display-drun: "Apps";
       drun-display-format: "{name}";
-      font: "JetBrains Mono 12";
+      font: "JetBrainsMono Nerd Font 12";
     }
 
     @theme "~/.config/rofi/themes/current.rasi"

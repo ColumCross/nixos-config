@@ -88,7 +88,6 @@
   xdg.portal = {
     enable = true;
     extraPortals = [
-      pkgs.xdg-desktop-portal-hyprland
       pkgs.xdg-desktop-portal-gtk
     ];
   };
@@ -97,7 +96,11 @@
   ## Hyprland
   #################################
 
-  programs.hyprland.enable = true;
+  programs.hyprland = {
+    enable = true;
+    package = unstablePkgs.hyprland;
+    portalPackage = unstablePkgs.xdg-desktop-portal-hyprland;
+  };
 
   #################################
   ## Git
@@ -126,10 +129,23 @@
   #################################
 
   fonts.packages = with pkgs; [
+    nerd-fonts.inconsolata
     nerd-fonts.jetbrains-mono
     font-awesome
   ];
 
+  # fonts.fontconfig = {
+  #   antialias = true;
+  #   hinting = {
+  #     enable = true;
+  #     style = "full";
+  #   };
+  #   subpixel = {
+  #     rgba = "rgb";
+  #     lcdfilter = "default";
+  #   };
+  # };
+  #
   #################################
   ## Nix Features
   #################################

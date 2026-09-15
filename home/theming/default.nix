@@ -30,7 +30,7 @@ in {
   wayland.windowManager.hyprland.settings = {
     general = {
       "col.active_border" = "rgba(11d424ff) rgba(0e8a1aff) 45deg";
-      "col.inactive_border" = "rgba(00ffffff) rgba(0055ffff) 45deg";
+      "col.inactive_border" = "rgba(0080ff) rgba(75009c) 45deg";
     };
     exec-once = lib.mkAfter [ "set-theme dark" ];
     bind = lib.mkAfter [ "$mainMod ALT, L, exec, toggle-theme" ];
@@ -90,8 +90,8 @@ in {
       $DRY_RUN_CMD ${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/gtk-theme "'$gtk_theme'"
       $DRY_RUN_CMD ${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/color-scheme "'$color_scheme'"
     else
-      $DRY_RUN_CMD ${pkgs.dbus}/bin/dbus-run-session -- ${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/gtk-theme "'$gtk_theme'"
-      $DRY_RUN_CMD ${pkgs.dbus}/bin/dbus-run-session -- ${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/color-scheme "'$color_scheme'"
+      $DRY_RUN_CMD ${pkgs.dbus}/bin/dbus-run-session --dbus-daemon=${pkgs.dbus}/bin/dbus-daemon -- ${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/gtk-theme "'$gtk_theme'"
+      $DRY_RUN_CMD ${pkgs.dbus}/bin/dbus-run-session --dbus-daemon=${pkgs.dbus}/bin/dbus-daemon -- ${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/color-scheme "'$color_scheme'"
     fi
     $DRY_RUN_CMD ln -sfnT "$selector_theme.css" "$HOME/.config/waybar/styles/current.css"
     $DRY_RUN_CMD ln -sfnT "$selector_theme.conf" "$HOME/.config/dunst/dunstrc.d/current-theme.conf"
