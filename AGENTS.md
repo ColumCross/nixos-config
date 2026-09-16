@@ -10,8 +10,14 @@ You should try to educate and teach me how things are done in NixOS. But never b
 ## Priorities and Important Rules
 These are the most important rules to follow in order after the rules set forth in the global AGENTS file. Everything else comes second.
 
+1. First rule (as always): Listen to what I say.
 2. Always recommend NixOS best practices and the NixOS way of doing things when designing architecture. I want this system to follow gold standard system architecture practices and I also want to learn how NixOS is meant to operate. However, again to Priority 1, my word is law. So, if I say that I want something designed in a non-best practice way, the way I suggest is the way it should be built.
-3. Be stingy with commits. Not everything in NixOS needs to be committed to the git tree to take affect in a rebuild. I'd rather commit strategically than every time one little thing is changed. However, if something needs to be committed for the rebuild to incorporate it, then a commit is acceptable.
+3. When asking for any nixos store file, just ask for permission for "/nix/store/*". That way I can give permission once, and you are off to the races.
+    * The first time Nix store access needs authorization, request access to /nix/store/*.
+    * Do not request individual hashed paths such as /nix/store/abc123-source/....
+    * Once /nix/store/* is approved, treat that as continuing permission for all Nix store paths.
+    * Do not repeatedly interrupt you with additional Nix store permission requests.
+    * If wildcard access is already granted and the tool succeeds, continue without asking again.
 4. Softbuilding:
     a. In build mode, use one soft build as the normal final validation after changing the NixOS configuration: run `nix build --no-link .#nixosConfigurations.laptop.config.system.build.toplevel` from `/etc/nixos`.
     b. This full build is intended to cover evaluation, generated configuration, Home Manager, packages, and system integration before I rebuild with sudo. Do not routinely add redundant `nix flake check`, explicit `nix eval`, targeted package builds, generated-output inspection, or repeated double-checking when the soft build is sufficient.
@@ -22,9 +28,9 @@ These are the most important rules to follow in order after the rules set forth 
 ## Additional Rules
 These are a list of additional rules and general things to do. They are not listed in a particular order.
 
+* Be stingy with commits. Not everything in NixOS needs to be committed to the git tree to take affect in a rebuild. I'd rather commit strategically than every time one little thing is changed. However, if something needs to be committed for the rebuild to incorporate it, then a commit is acceptable.
 * When researching or debugging, don't look at the git logs so much. There is no need to be doing a ton of git diffs. Similarly, when researching, have a reason to be looking at files you do not have access to.
 * If you do need to ask permission to read a file, determine if you will need to read multiple files in the same directory structure and ask for the parent directory. With a good reason I will generally grant more access, and I would rather not have a bunch of file access permission requests.
-* When asking for a specific nixos store file, just ask for permission for "/nix/store/*". That way I can give permission once, and you are off to the races.
 * Configuration documentation and unique feature information should exist in the README. Review the README to gain additional insights into the system. Keep the README up to date, but ALWAYS check first before editing it. I may not want certain information added to the README; it is a public file, so ensure only things that are safe for anyone's eyes are there.
 
 # NixOS Laptop Configuration

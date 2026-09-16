@@ -62,7 +62,7 @@ let
       done
 
       hyprctl keyword general:col.active_border "rgba(11d424ff) rgba(0e8a1aff) 45deg"
-      hyprctl keyword general:col.inactive_border "rgba(0080ff) rgba(75009c) 45deg"
+      hyprctl keyword general:col.inactive_border "rgb(0080ff) rgb(75009c) 45deg"
       dconf write /org/gnome/desktop/interface/gtk-theme "'$gtk_theme'"
       dconf write /org/gnome/desktop/interface/color-scheme "'prefer-$new'"
       ${pkgs.kdePackages.plasma-workspace}/bin/plasma-apply-colorscheme "$kde_color_scheme" >/dev/null 2>&1 || true

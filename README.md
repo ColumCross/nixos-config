@@ -1,207 +1,118 @@
 # NixOS Laptop Configuration
 
-Declarative NixOS and Home Manager configuration for the `laptop` flake target.
-The system tracks NixOS 26.05 and Home Manager release-26.05 while retaining
-`system.stateVersion = "25.05"` and `home.stateVersion = "25.05"` for migration
-compatibility.
+This repository configures my NixOS laptop and its Hyprland desktop. It includes
+the system configuration, Home Manager environment, desktop theming, workspace
+tools, editor setup, and support for an HP DisplayLink dock.
+
+This README was prepared by GPT-5.6 Sol with human review. It is intended to be human readable, but provide enough context for AI Agents to use without need for duplicative wording in the AGENTS.md file.
 
 ## System Overview
 
-- User: `colum`
-- Host: `nixos`
-- Desktop: Hyprland on Wayland
-- Login: greetd with text-mode tuigreet
-- Audio: PipeWire with ALSA and PulseAudio compatibility
-- Shell: Bash managed by Home Manager
-- Terminal: Kitty
-- Editor: Neovim with NVChad
-- Status bar: Waybar
-- Notifications: Dunst
-- Application launcher: Rofi
-- Wallpaper service: Hyprpaper
-- Lock and idle handling: Hyprlock and Hypridle
-- VPN: NordVPN through the local NordVPN flake input
+- Hyprland desktop with greetd and tuigreet
+- Waybar, Rofi, Dunst, Hyprpaper, Hyprlock, and Hypridle
+- Kitty and Bash
+- Neovim with NVChad
+- PipeWire audio and EasyEffects
+- NetworkManager, Bluetooth, and NordVPN
+- HP USB-C/A Universal Dock G2 with two HP E243 displays
 
-## Repository Layout
+## Repository Map
 
 ```text
 /etc/nixos/
-|-- configuration.nix
-|-- packages.nix
-|-- flake.nix
-|-- flake.lock
+|-- configuration.nix       # System services, user, login, and Hyprland package
+|-- packages.nix            # System packages and NordVPN
+|-- flake.nix               # Inputs, machine profile, and module assembly
 |-- hardware-configuration.nix
-|-- home.nix
+|-- home.nix                # Home Manager and the main desktop session
 |-- home/
-|   `-- theming/
-|-- opencode/
-|   `-- plugins/
-|       `-- active-sleep-inhibit.js
-|-- AGENTS.md
-|-- README.md
-|-- patches/
-|   `-- waybar-hyprland-workspace-dnd.patch
-|-- scripts/
-|   `-- workspace-control.py
-|-- tests/
-|   `-- test_workspace_control.py
-|-- nvim/
-|   |-- init.lua
-|   |-- lazy-lock.json
-|   |-- .stylua.toml
-|   `-- lua/
+|   |-- theming/            # Theme variants and switching
+|   `-- waybar/             # Waybar package and configuration
+|-- hyprland/
+|   `-- keybindings.nix
+|-- modules/
+|   `-- gtk4-color-scheme.nix
+|-- nvim/                   # NVChad configuration
+|-- opencode/plugins/       # OpenCode sleep inhibitor
+|-- patches/                # GTK4 and Waybar patches
+|-- scripts/                # Rebuild and workspace tools
+|-- spotify-player/
+|-- tests/                  # Workspace controller and topology tests
 `-- wallpapers/
-    |-- nix-dark.png
-    `-- nix-bright.png
 ```
 
-`configuration.nix` owns system services, users, fonts, networking, audio,
-Bluetooth, greetd, portals, and Hyprland enablement. `packages.nix` owns system
-packages and NordVPN configuration.
+`configuration.nix` owns system-level services and the compositor package.
+`home.nix` owns the user session and imports the focused theming and Waybar
+modules. Custom scripts are packaged through Home Manager so their runtime
+dependencies are explicit.
 
-`home.nix` owns the user's shell, desktop session, workspace controller, Waybar
-modules, Dunst behavior, Hypridle, Hyprlock, Rofi launch behavior, Kitty,
-Neovim mappings, OpenCode plugin deployment, and wrapper scripts.
-`home/theming` owns dynamic appearance variants, Hyprpaper, theme-specific
-desktop integrations, and the theme switcher. The tracked Waybar patch adds the
-GTK drag/drop hook used by the workspace controller.
+## Common Commands
 
-`hardware-configuration.nix` is generated for this machine and should not be
-edited manually.
+The shell aliases below can be run from any directory:
 
-## Flake Architecture
-
-`flake.nix` centralizes machine-specific values in `profile`:
-
-```nix
-profile = {
-  username = "colum";
-  homeDirectory = "/home/colum";
-  hostName = "nixos";
-  flakeName = "laptop";
-  configDirectory = "/etc/nixos";
-};
+```sh
+rebuild  # Activate the current configuration
+update   # Update flake inputs, then activate
 ```
 
-The main inputs are NixOS 26.05, Home Manager release-26.05, the unstable
-nixpkgs package set used for selected applications, Claude Desktop, OpenCode,
-and the local NordVPN module.
+Before activating a configuration change, it can be fully built without
+creating a `result` symlink:
 
-The NordVPN module is a locked local Git flake input:
-
-```nix
-nordvpn-module.url = "git+file:///etc/nixos-modules/nix_modules";
+```sh
+nix build --no-link /etc/nixos#nixosConfigurations.laptop.config.system.build.toplevel
 ```
 
-Because it is a flake input recorded in `flake.lock`, the normal check,
-evaluation, build, and rebuild commands are pure and do not require
-`--impure`. Changes in the separate NordVPN repository must be committed before
-updating this repository's lock file to a new revision.
+The graphical rebuild shortcut runs `rebuild-nixos`. Its terminal remains open
+after the rebuild and failed output is copied to the clipboard.
 
-## Login And Session
-
-greetd runs tuigreet in text mode. The greeter limits its user menu to UID 1000
-and starts the Hyprland package's `start-hyprland` command after successful
-password authentication.
-
-```text
-tuigreet --time --user-menu --user-menu-min-uid 1000 \
-  --user-menu-max-uid 1000 --cmd .../bin/start-hyprland
-```
-
-This is a single-user password prompt, not autologin. UID 1000 must belong to
-the intended desktop user. Changing only `profile.username` does not change the
-UID filter, so adapting this configuration for another machine also requires
-checking that user's UID or changing the greetd command.
-
-The greeter runs on its own virtual terminal. Root and recovery access remain
-available through another TTY.
-
-## Hyprland
-
-The NixOS Hyprland module supplies the compositor and portal packages. The Home
-Manager module sets both `package` and `portalPackage` to `null` so it reuses
-those system packages instead of installing a second, potentially mismatched
-copy.
-
-The Home Manager configuration remains in Hyprland's native configuration
-format through:
-
-```nix
-configType = "hyprlang";
-```
-
-The desktop starts NetworkManager and Bluetooth applets, Hypridle, and the dark
-theme. Waybar is a Home Manager systemd user service attached to the Hyprland
-session target, so an activated generation runs its configured package. The
-default Hyprland logo and splash rendering are disabled.
-Alt-dragging a tiled window uses precise cursor-based placement, allowing it to
-be dropped on any side of another tiled window.
-
-Notable shortcuts:
+## Keybindings
 
 | Shortcut | Action |
 |---|---|
 | `SUPER+T` | Open Kitty |
 | `SUPER+SPACE` | Open Rofi |
-| `SUPER+W` | Open Chrome |
-| `SUPER+B` | Open Bluetooth manager |
+| `SUPER+H/J/K/L` | Move focus with Vim-style directions |
 | `SUPER+SHIFT+L` | Lock the session |
-| `SUPER+ALT+L` | Toggle dark/light theme |
+| `SUPER+ALT+L` | Toggle the dark/light theme |
 | `SUPER+CTRL+SHIFT+R` | Open the rebuild wrapper |
 | `SUPER+CTRL+C` | Open OpenCode in `/etc/nixos` |
 | `SUPER+CTRL+SHIFT+C` | Open Neovim in `/etc/nixos` |
-| `SUPER+1` through `SUPER+0` | Select visible desktop 1 through 10 |
-| `SUPER+SHIFT+1` through `SUPER+SHIFT+0` | Move the active window to visible desktop 1 through 10 |
-| `SUPER+LEFT` / `SUPER+RIGHT` | Select the previous/next visible desktop |
-| `SUPER+SHIFT+LEFT` / `SUPER+SHIFT+RIGHT` | Move the active window one visible desktop left/right |
-| `SUPER+SHIFT+ALT+LEFT` / `SUPER+SHIFT+ALT+RIGHT` | Move the current desktop one visible position left/right |
+| `SUPER+1` through `SUPER+0` | Select desktop 1 through 10 |
+| `SUPER+SHIFT+1` through `SUPER+SHIFT+0` | Move the active window to desktop 1 through 10 |
+| `SUPER+LEFT/RIGHT` | Cycle through existing desktops and wrap |
+| `SUPER+SHIFT+LEFT/RIGHT` | Move the active window to the adjacent number |
+| `SUPER+SHIFT+ALT+LEFT/RIGHT` | Reorder the current desktop among existing desktops |
+| `SUPER+CTRL+ARROW` | Move the current desktop to another monitor |
 | `CTRL+SHIFT+4` | Copy a selected-area screenshot |
 | `CTRL+SHIFT+5` | Copy a full-screen screenshot |
 
-The rebuild shortcut intentionally invokes the `rebuild-nixos` wrapper. This
-keeps the flake reference out of the Hyprland bind value, where `#` would be
-interpreted as the start of a comment.
+## Primary Applications
 
-### HP USB-C/A Universal Dock G2
+### EasyEffects
 
-The HP USB-C/A Universal Dock G2 uses DisplayLink for its display outputs. The
-NixOS DisplayLink module loads the EVDI kernel module, installs the dock's udev
-rules and suspend hooks, and starts `dlm.service` at boot. This is separate from
-the laptop's Intel display driver; do not add Thunderbolt or Bolt configuration
-for this USB DisplayLink dock.
+EasyEffects runs as a background PipeWire service with an empty pipeline. It
+does not restore the previously selected preset after a service or machine
+restart. The Nix-managed `HB-Mid` output preset remains available for manual
+selection during the current service lifetime.
 
-The proprietary DisplayLink 6.2 driver archive is deliberately not committed.
-After cloning the repository, accept the Synaptics DisplayLink license and add
-the exact archive required by the locked Nixpkgs package:
+### Neovim
 
-```sh
-nix-prefetch-url --name displaylink-620.zip \
-  "https://www.synaptics.com/sites/default/files/exe_files/2025-09/DisplayLink%20USB%20Graphics%20Software%20for%20Ubuntu6.2-EXE.zip"
+NVChad is configured under `nvim/`. Most files are immutable Home Manager
+links, but `lazy-lock.json` intentionally points directly into this repository:
+
+```text
+~/.config/nvim/lazy-lock.json -> /etc/nixos/nvim/lazy-lock.json
 ```
 
-With two external HP E243 displays attached, declarative Hyprland rules place
-the physical left display at the upper left, the physical right display to its
-right, and center the laptop panel below them. The external displays use their
-native `1920x1080@60` mode at scale `0.83`; the laptop panel remains at scale
-`1.00`. Workspace 1 is assigned to the physical left dock display. The generic
-Hyprland monitor rule remains as a fallback for undocked use and unexpected
-outputs.
+This allows `:Lazy sync` to update the tracked lock file. Markdown completion
+is limited to paths, and `bullets.nvim` supplies list continuation and
+renumbering in Markdown, text, and git commit buffers.
 
-Closing the lid while an external display is active locks the session and
-disables the laptop panel without suspending. Opening it restores the panel to
-the docked layout when both external displays are present, or to `0x0` when
-undocked. USB keyboard and mouse devices are handled as normal HID devices.
-`input.left_handed = true` makes the physical right button the primary button
-for every pointer device, including the touchpad.
+# Custom Features
 
-NetworkManager automatically manages the dock's Ethernet adapter, while
-PipeWire discovers the dock's audio device. Use the existing Pavucontrol launch
-button in Waybar to select a preferred dock or monitor audio profile.
+## Theme Switching
 
-# Theme Switcher
-
-The desktop has explicit target and toggle commands:
+The desktop has explicit dark, light, and toggle commands:
 
 ```sh
 set-theme dark
@@ -209,260 +120,127 @@ set-theme light
 toggle-theme
 ```
 
-Hyprland runs `set-theme dark` at session startup. `toggle-theme` reads
-`~/.cache/current-theme` and selects the opposite target.
+Each Hyprland session starts in dark mode. A switch updates the wallpaper,
+Kitty, btop, GTK and KDE color preferences, Waybar, Dunst, Rofi, Wlogout, and
+running Neovim instances. The selected theme is recorded in
+`~/.cache/current-theme`.
 
-Each theme application updates:
+Theme assets are Nix-managed, while small `current` symlinks select the active
+variant. Wallpaper application happens first; the shared state changes only if
+it succeeds. Successful switches are silent, while a persistent wallpaper
+failure sends a Dunst notification.
 
-- The active Hyprpaper wallpaper
-- The shared theme state file
-- Kitty's selected palette and running Kitty windows
-- Hyprland border colors
-- The GNOME desktop color preference used by GTK and Electron applications
-- Waybar styling
-- Dunst styling
-- Rofi styling
-- GTK4 styling used by hyprKCS
-- Wlogout styling
-- Neovim's active NVChad palette
-
-The wallpapers are Nix-managed assets:
-
-```text
-/etc/nixos/wallpapers/nix-dark.png
-/etc/nixos/wallpapers/nix-bright.png
-```
-
-Hyprpaper starts with the dark wallpaper and exposes IPC. `set-theme` uses the
-current Hyprpaper wallpaper command with cover fit mode and retries while the
-service starts. It commits the new shared state only after the wallpaper switch
-succeeds. A persistent wallpaper failure produces a Dunst notification; normal
-successful switches are intentionally silent.
-
-Home Manager owns immutable dark and light variants for Waybar, Dunst, Rofi,
-and Wlogout under `~/.config`. The switcher owns only their small `current`
-selector symlinks, allowing it to switch themes without rewriting Nix-managed
-style content. The shared state file remains `~/.cache/current-theme` so
-Neovim and other consumers can update independently.
-
-Kitty's palette files are user-owned files at:
+Kitty palettes remain user-editable at:
 
 ```text
 ~/.config/kitty/theme-dark.conf
 ~/.config/kitty/theme-light.conf
 ```
 
-`~/.config/kitty/current-theme.conf` points to the selected file. Kitty permits
-remote control through per-process sockets, allowing the switcher to recolor
-running terminals. The palette files can be edited without rebuilding NixOS.
+## Workspace Control
 
-# Workspace Reordering
+Only existing numbered desktops appear in Waybar. Number shortcuts select or
+create desktops 1 through 10. Left and right navigation cycles through the
+existing set, while window movement targets the numerically adjacent desktop
+and may create it. Numeric movement stops at 1 and 10.
 
-The desktop has a single workspace control command with explicit operations:
+Waybar desktops can be dragged onto another visible desktop. Dropping on the
+left or right half inserts the dragged desktop before or after the target. The
+operation preserves each workspace identity, its windows, and monitor; it
+reassigns the visible numeric labels to represent the new order. An invalid
+drop makes no change.
 
-```sh
-workspace-control focus 2
-workspace-control move 2
-workspace-control cycle next
-workspace-control move-relative next
-workspace-control shift previous
-workspace-control reorder SOURCE_ID TARGET_ID before
-```
+`workspace-control` serializes changes, verifies Hyprland's result, and attempts
+to restore the original mapping after a failed reorder. Failures are reported
+through Dunst; successful operations are silent.
 
-Waybar desktops can be dragged onto another visible desktop. Drop on the left
-half of the target to insert before it or its right half to insert after it.
-Pressing and dragging does not immediately change the desktop order or its
-number. Waybar only marks the dragged desktop and prospective insertion edge.
-The reorder occurs after the mouse button is released over a valid target;
-releasing outside a target cancels it without changing anything.
+`workspace-topology` listens for monitor changes. With both dock displays
+present, it places desktops 1, 2, and 3 on the left display, right display, and
+laptop panel. Undocked, it places desktop 1 on the laptop panel. These are named
+workspace identities so topology updates do not undo drag/drop ordering.
 
-After a successful drop, every existing numbered desktop is renumbered in its
-new global order while keeping its windows and monitor assignment. For example,
-dragging desktop 4 before desktop 2 changes the underlying content order to 1,
-4, 2, 3, then labels those positions 1, 2, 3, 4. The sequence remains globally
-unique when another monitor is attached. `SUPER+2`, the matching window-move
-shortcut, Waybar clicks, and left/right navigation then use the new second
-desktop. Only existing desktops are displayed; empty desktops are not retained
-as drag targets.
+## Notifications and Notification Sound Mute Button
 
-`SUPER+SHIFT+LEFT` and `SUPER+SHIFT+RIGHT` move the active window to the
-previous or next visible desktop. `SUPER+SHIFT+ALT+LEFT` and
-`SUPER+SHIFT+ALT+RIGHT` move the current desktop one visible position in that
-direction. These relative actions stop at the first and last visible desktop;
-they do not wrap.
+Every Dunst notification plays the configured alert sound. The bell beside
+Waybar's volume control toggles this sound for the current graphical session.
+Muting notifications does not hide visual notifications or affect any other
+audio, and the setting returns to enabled after logout or reboot.
 
-The feature is fully declarative and cloneable. The tracked patch at
-`patches/waybar-hyprland-workspace-dnd.patch` adds an opt-in `on-drop` action to
-the pinned Waybar package. `home.nix` applies that patch with a package override,
-builds `scripts/workspace-control.py` with explicit Nix runtime dependencies,
-and configures the Hyprland workspace module to invoke it. No external checkout
-or manual patching is required after cloning this repository.
+OpenCode uses Dunst for attention notifications, so it follows the same sound
+setting rather than playing a separate TUI sound.
 
-Workspace renumbering is deferred until Waybar's successful GTK drop callback.
-The controller serializes all workspace operations, validates Hyprland replies,
-uses a collision-free temporary name, and verifies the final ID-to-name mapping.
-If a rename fails or the process is interrupted, it restores and verifies the
-original mapping before reporting success; an incomplete rollback is reported
-explicitly through Dunst. Successful reorders are intentionally silent.
+## OpenCode Sleep Inhibition
 
-# OpenCode Active Sleep Inhibition
+The Home Manager-deployed OpenCode plugin holds a systemd idle and sleep
+inhibitor while an OpenCode session is busy or retrying, including while it is
+waiting at a permission or question prompt. Each concurrent session owns its
+own inhibitor and releases it when that session becomes idle.
 
-The tracked OpenCode plugin at `opencode/plugins/active-sleep-inhibit.js` is
-deployed by Home Manager to
-`~/.config/opencode/plugins/active-sleep-inhibit.js`. Nix substitutes the
-plugin's runtime commands with immutable store paths, so it has no npm
-dependencies or manually managed home-directory source files.
-
-Each OpenCode session independently owns a systemd block inhibitor while its
-status is `busy` or `retry`. A session releases only its own inhibitor after it
-becomes `idle`; concurrent active sessions therefore remain protected until
-each one finishes. Permission and question prompts remain `busy`, so the laptop
-does not lock or suspend while OpenCode waits for a response.
-
-The plugin uses `systemd-inhibit --what=idle:sleep --mode=block`, which pauses
-Hypridle's normal idle actions and blocks system sleep. Every inhibitor has a
-parent-process watchdog and normal plugin shutdown releases all remaining
-inhibitors, preventing an OpenCode crash from leaving a permanent lock.
-
-Inspect the active inhibitors with:
+Inspect active inhibitors with:
 
 ```sh
 systemd-inhibit --list
 ```
 
-After activating a new Home Manager generation, restart OpenCode so it loads
-the updated plugin.
+Restart OpenCode after activating a plugin change.
 
-## Notifications
+# Hardware Notes
 
-Dunst is managed by Home Manager and starts with the graphical session. Every
-notification invokes a detached PipeWire playback of the Freedesktop
-`message-new-instant.oga` sound at volume `0.5`.
+## HP USB-C/A Universal Dock G2
 
-The sound rule applies to all Dunst notifications, including screenshot and
-theme-error notifications. Theme-switch completion notifications are disabled;
-this does not disable Dunst or sounds for other notifications.
-
-The bell button beside Waybar's volume control toggles notification sounds for
-the current graphical session. It changes only the Dunst sound hook: visual
-notifications remain visible, and media, application, microphone, and system
-audio are unaffected. OpenCode keeps its visual attention notifications but
-uses this same Dunst-controlled sound path rather than a separate TUI sound.
-The setting defaults to enabled and resets after logout or reboot.
-
-## Neovim And NVChad
-
-Home Manager enables Neovim for the executable, editor defaults, and language
-provider support. The NVChad configuration under `nvim/` is mapped into
-`~/.config/nvim` with `xdg.configFile`.
-
-Most files are immutable Nix-managed links. The lock file is deliberately
-different:
-
-```text
-~/.config/nvim/lazy-lock.json -> /etc/nixos/nvim/lazy-lock.json
-```
-
-It is an out-of-store link, so `:Lazy sync` can update the tracked repository
-file directly. Review and commit that change like any other configuration
-change.
-
-Markdown buffers use filename/path completion only; LSP, snippet, buffer-word,
-and Lua completion remain enabled for other filetypes. This applies to all files
-Neovim identifies as `markdown`, including `.md` and `.markdown` files.
-
-`bullets.nvim` uses its default configuration. In Markdown, text, and gitcommit
-buffers, `Enter` continues a list, so entering `1. Text` and pressing Enter
-starts `2. `. `Ctrl+Enter` inserts a plain newline, `gN` renumbers lists, and
-the plugin's other default list and checkbox mappings remain available.
-
-## EasyEffects
-
-EasyEffects runs hidden as a background PipeWire service with an empty,
-audio-transparent pipeline. It starts with no active preset and does not use
-global bypass, avoiding its unreliable idle/resume behavior.
-
-The Nix-managed `HB-Mid` output preset remains available for manual selection
-in the application. A manually selected preset remains active only for the
-current EasyEffects service lifetime: restarting EasyEffects or the machine
-always clears the preset and restores the empty pipeline.
-
-## Rebuild And Update Workflow
-
-Run commands from `/etc/nixos` unless an absolute flake reference is shown.
-
-Check flake evaluation without building:
+The dock uses DisplayLink rather than Thunderbolt. Its proprietary driver
+archive is not committed. After cloning onto a machine without the archive,
+accept the Synaptics license and add the version required by the configured
+Nixpkgs package:
 
 ```sh
-nix flake check --no-build
+nix-prefetch-url --name displaylink-620.zip \
+  "https://www.synaptics.com/sites/default/files/exe_files/2025-09/DisplayLink%20USB%20Graphics%20Software%20for%20Ubuntu6.2-EXE.zip"
 ```
 
-Evaluate the system derivation:
+The two HP E243 displays sit side by side above the laptop panel. Their shared
+scale is controlled by `externalMonitorScale` near the top of `home.nix`; all
+layout coordinates are derived from it. The current value is `5.0 / 6.0`.
 
-```sh
-nix eval .#nixosConfigurations.laptop.config.system.build.toplevel.drvPath
-```
+Closing the lid while an external display is active locks the session and
+disables the laptop panel without suspending. Opening it restores the docked
+layout when both external displays are present, or the normal laptop layout
+when undocked. Pointer input, including the touchpad, is configured left-handed.
 
-Perform the required soft build without creating a `result` symlink:
+# Architecture And Invariants
 
-```sh
-nix build --no-link .#nixosConfigurations.laptop.config.system.build.toplevel
-```
+These constraints are easy to miss when changing the configuration:
 
-Activate the system:
-
-```sh
-sudo nixos-rebuild switch --flake /etc/nixos#laptop
-```
-
-The `rebuild` Bash alias runs the same activation command. The graphical
-`rebuild-nixos` wrapper also pauses before closing its Kitty window so build
-output remains visible.
-
-Update all locked flake inputs and activate:
-
-```sh
-update
-```
-
-This alias runs `nix flake update --flake /etc/nixos` and then rebuilds the
-`laptop` target. Review lock-file changes before committing them.
-
-Use `--impure` only if the configuration is deliberately changed to read an
-unlocked path, environment value, or another impure dependency. It is not part
-of this configuration's normal workflow.
-
-## Customizing The Machine
-
-For a different user or host, update `profile` in `flake.nix` and verify all
-machine assumptions. In particular:
-
-- Confirm the greetd UID restriction matches the intended desktop user.
-- Regenerate `hardware-configuration.nix` for different hardware.
-- Review the timezone, keyboard layout, monitor rule, battery paths, and lid
-  behavior.
-- Review the fixed `/etc/nixos` and local NordVPN repository paths if moving the
-  checkout.
-- Keep both state versions unchanged unless performing a deliberate state
-  migration after reading the relevant NixOS and Home Manager release notes.
+- Machine-specific names and paths are centralized in `profile` in `flake.nix`.
+- The NixOS Hyprland module owns the compositor and portal packages. Home
+  Manager sets both package options to `null` and owns only session settings.
+- Commands containing the flake separator `#` must not be placed directly in a
+  Hyprland bind because Hyprland treats it as a comment. Use a wrapper command.
+- greetd intentionally limits its menu to UID 1000. Changing the configured
+  username or moving to another machine requires checking that UID assumption.
+- The NordVPN module comes from `/etc/nixos-modules/nix_modules`; this checkout
+  depends on that separate local repository.
+- Theme variants are immutable. Only selector symlinks and the shared cache
+  state are mutable, and normal theme switches must remain silent.
+- `patches/waybar-hyprland-workspace-dnd.patch` supplies Waybar's opt-in drop
+  action. Workspace reordering depends on this patched package.
+- `modules/gtk4-color-scheme.nix` applies the GTK4 color-scheme backport needed
+  for applications to start with the selected desktop theme.
+- Workspace topology must preserve named workspace identities and existing
+  labels when monitors change.
+- `nvim/lazy-lock.json` must remain an out-of-store link so Lazy can update it.
+- The OpenCode plugin must inhibit both idle handling and sleep while work or a
+  user prompt is active, without one session releasing another's inhibitor.
+- EasyEffects must start without an active preset or global bypass.
 
 ## Troubleshooting
 
-If Home Manager reports an existing-file conflict, inspect the named path before
-activation. Do not keep a manually managed `~/.bashrc`; Home Manager owns it.
-
-If the desktop theme is incomplete, run an explicit target first:
-
-```sh
-set-theme dark
-```
-
-Then verify Hyprpaper, Waybar, Dunst, Kitty, Rofi, Wlogout, and Neovim
-individually. The theme state file is `~/.cache/current-theme`.
+If the desktop theme is incomplete, run `set-theme dark`. A wallpaper failure
+is reported through Dunst; the active state is in `~/.cache/current-theme`.
 
 If Lazy cannot update its lock file, verify that
-`~/.config/nvim/lazy-lock.json` resolves to the tracked file in `/etc/nixos`,
-not to an immutable `/nix/store` path.
+`~/.config/nvim/lazy-lock.json` resolves to `/etc/nixos/nvim/lazy-lock.json`, not
+to an immutable Nix store path.
 
-If greetd does not present the expected account, verify the user's numeric UID
-with `id` and compare it to the UID range in `configuration.nix`.
+If greetd does not show the expected account, compare the user's numeric UID
+with the UID 1000 restriction in `configuration.nix`.

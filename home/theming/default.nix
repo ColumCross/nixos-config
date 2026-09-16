@@ -30,7 +30,7 @@ in {
   wayland.windowManager.hyprland.settings = {
     general = {
       "col.active_border" = "rgba(11d424ff) rgba(0e8a1aff) 45deg";
-      "col.inactive_border" = "rgba(0080ff) rgba(75009c) 45deg";
+      "col.inactive_border" = "rgb(0080ff) rgb(75009c) 45deg";
     };
     exec-once = lib.mkAfter [ "set-theme dark" ];
     bind = lib.mkAfter [ "$mainMod ALT, L, exec, toggle-theme" ];

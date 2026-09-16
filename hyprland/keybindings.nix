@@ -70,10 +70,10 @@
     "$mainMod SHIFT ALT, left, exec, workspace-control shift previous"
     "$mainMod SHIFT ALT, right, exec, workspace-control shift next"
 
-    "$mainMod CTRL, left, exec, hyprctl dispatch movecurrentworkspacetomonitor l"
-    "$mainMod CTRL, up, exec, hyprctl dispatch movecurrentworkspacetomonitor u"
-    "$mainMod CTRL, right, exec, hyprctl dispatch movecurrentworkspacetomonitor r"
-    "$mainMod CTRL, down, exec, hyprctl dispatch movecurrentworkspacetomonitor d"
+    "$mainMod CTRL, left, exec, workspace-control move-monitor l"
+    "$mainMod CTRL, up, exec, workspace-control move-monitor u"
+    "$mainMod CTRL, right, exec, workspace-control move-monitor r"
+    "$mainMod CTRL, down, exec, workspace-control move-monitor d"
 
   ];
 

@@ -5,12 +5,21 @@
 
 let
   flakeReference = "${profile.configDirectory}#${profile.flakeName}";
+
+  # Monitor settings
+
+  externalMonitorScalePresets = {
+    standard = 1.0;
+    compact = 5.0 / 6.0;
+  };
+  externalMonitorScale = externalMonitorScalePresets.standard;
+
   externalMonitorWidth = 1920;
   externalMonitorHeight = 1080;
-  externalMonitorScale = 5.0 / 6.0;
   externalMonitorMode = "${toString externalMonitorWidth}x${toString externalMonitorHeight}@60";
   externalMonitorLogicalWidth = builtins.floor (externalMonitorWidth / externalMonitorScale);
   externalMonitorLogicalHeight = builtins.floor (externalMonitorHeight / externalMonitorScale);
+
   laptopPanelWidth = 1920;
   laptopPanelHeight = 1080;
   dockedLaptopX = builtins.floor ((2 * externalMonitorLogicalWidth - laptopPanelWidth) / 2);
@@ -24,6 +33,14 @@ let
     ];
     text = ''
       exec python3 ${./scripts/workspace-control.py} "$@"
+    '';
+  };
+
+  workspace-topology = pkgs.writeShellApplication {
+    name = "workspace-topology";
+    runtimeInputs = [ pkgs.python3 ];
+    text = ''
+      exec python3 ${./scripts/workspace-topology.py}
     '';
   };
 
@@ -164,6 +181,7 @@ in
     launch-pavucontrol
     brightness-adjust
     workspace-control
+    workspace-topology
     notification-sound-control
     rebuild-nixos
     (pkgs.writeShellScriptBin "opencode-nixos" ''
@@ -254,7 +272,11 @@ in
         ",preferred,auto,1"
       ];
 
-      workspace = [ "1,monitor:desc:HP Inc. HP E243 CNC8501MRZ" ];
+      workspace = [
+        "name:1,monitor:desc:HP Inc. HP E243 CNC8501MRZ,default:true"
+        "name:2,monitor:desc:HP Inc. HP E243 CNK828106Z,default:true"
+        "name:3,monitor:eDP-1,default:true"
+      ];
 
       env = [
         "XCURSOR_SIZE,24"
@@ -345,6 +367,7 @@ in
       exec-once = [
         "nm-applet"
         "blueman-applet"
+        "workspace-topology"
       ];
 
       inherit (hyprlandKeybindings) bind bindel bindl bindm;

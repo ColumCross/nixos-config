@@ -29,6 +29,28 @@ def sorted_numbered(workspaces):
     return selected
 
 
+def fallback_repair_steps(workspaces):
+    selected = [workspace for workspace in workspaces if numbered(workspace)]
+    by_name = {}
+    for workspace in selected:
+        by_name.setdefault(workspace["name"], []).append(workspace)
+
+    available = iter(str(number) for number in range(1, 11) if str(number) not in by_name)
+    steps = []
+    for name, duplicates in by_name.items():
+        if len(duplicates) == 1:
+            continue
+        fallbacks = [workspace for workspace in duplicates if workspace["id"] == int(name)]
+        if len(duplicates) != 2 or len(fallbacks) != 1:
+            raise WorkspaceError("Numbered desktops are not uniquely identified")
+        try:
+            replacement = next(available)
+        except StopIteration as error:
+            raise WorkspaceError("No unused desktop number is available for fallback repair") from error
+        steps.append((fallbacks[0]["id"], replacement))
+    return steps
+
+
 def reordered_ids(workspaces, source_id, target_id, placement):
     ordered = sorted_numbered(workspaces)
     ids = [workspace["id"] for workspace in ordered]
@@ -222,6 +244,23 @@ class Controller:
             if 1 <= destination <= 10:
                 self.dispatch("movetoworkspace", f"name:{destination}")
 
+    def repair(self):
+        with self.lock():
+            self._repair_fallbacks_locked()
+
+    def move_monitor(self, direction):
+        with self.lock():
+            if direction not in ("l", "r", "u", "d"):
+                raise WorkspaceError("Invalid monitor direction")
+            self.snapshot()
+            self.dispatch("movecurrentworkspacetomonitor", direction)
+            self._repair_fallbacks_locked()
+
+    def _repair_fallbacks_locked(self):
+        for workspace_id, name in fallback_repair_steps(self.workspaces()):
+            self.dispatch("renameworkspace", workspace_id, name)
+        sorted_numbered(self.workspaces())
+
     def shift(self, direction):
         with self.lock():
             workspaces = self.snapshot()
@@ -267,8 +306,10 @@ def main(arguments):
     command = arguments[1]
     if command in ("focus", "move") and len(arguments) == 3 and arguments[2] in {str(number) for number in range(1, 11)}:
         getattr(controller, command)(arguments[2])
-    elif command in ("cycle", "move-relative", "shift") and len(arguments) == 3:
+    elif command in ("cycle", "move-relative", "move-monitor", "shift") and len(arguments) == 3:
         getattr(controller, command.replace("-", "_"))(arguments[2])
+    elif command == "repair" and len(arguments) == 2:
+        controller.repair()
     elif command == "reorder" and len(arguments) == 5:
         controller.reorder(int(arguments[2]), int(arguments[3]), arguments[4])
     else:
