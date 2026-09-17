@@ -245,11 +245,11 @@
     "nordvpn-module": {
       "flake": false,
       "locked": {
-        "lastModified": 1787683945,
-        "narHash": "sha256-cMJkEzPT4DcDJlYFcmA0NIaJEVg79CoYkxWKdalIlWs=",
+        "lastModified": 1789677510,
+        "narHash": "sha256-cFWRQksqpSMAxS/y/j2KI/rgMB41m5y2jv7+lxteahM=",
         "ref": "refs/heads/main",
-        "rev": "ca4664052a656d631125e96830df3d6007b80dd2",
-        "revCount": 6,
+        "rev": "8861ac6a73e1e7da2c4aef4f4917badb2e3b3a65",
+        "revCount": 9,
         "type": "git",
         "url": "file:///etc/nixos-modules/nix_modules"
       },
