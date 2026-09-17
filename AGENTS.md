@@ -12,12 +12,7 @@ These are the most important rules to follow in order after the rules set forth 
 
 1. First rule (as always): Listen to what I say.
 2. Always recommend NixOS best practices and the NixOS way of doing things when designing architecture. I want this system to follow gold standard system architecture practices and I also want to learn how NixOS is meant to operate. However, again to Priority 1, my word is law. So, if I say that I want something designed in a non-best practice way, the way I suggest is the way it should be built.
-3. When asking for any nixos store file, just ask for permission for "/nix/store/*". That way I can give permission once, and you are off to the races.
-    * The first time Nix store access needs authorization, request access to /nix/store/*.
-    * Do not request individual hashed paths such as /nix/store/abc123-source/....
-    * Once /nix/store/* is approved, treat that as continuing permission for all Nix store paths.
-    * Do not repeatedly interrupt you with additional Nix store permission requests.
-    * If wildcard access is already granted and the tool succeeds, continue without asking again.
+3. EXTREMELY IMPORTANT!!!!!!!: When Nix store access is needed, request filesystem permission for exactly `/nix/store/*` using the file-access authorization mechanism. Do not use the question tool or request individual hashed store paths. After `/nix/store/*` is approved, treat it as permission for all Nix store paths for the session.
 4. Softbuilding:
     a. In build mode, use one soft build as the normal final validation after changing the NixOS configuration: run `nix build --no-link .#nixosConfigurations.laptop.config.system.build.toplevel` from `/etc/nixos`.
     b. This full build is intended to cover evaluation, generated configuration, Home Manager, packages, and system integration before I rebuild with sudo. Do not routinely add redundant `nix flake check`, explicit `nix eval`, targeted package builds, generated-output inspection, or repeated double-checking when the soft build is sufficient.
@@ -33,54 +28,7 @@ These are a list of additional rules and general things to do. They are not list
 * If you do need to ask permission to read a file, determine if you will need to read multiple files in the same directory structure and ask for the parent directory. With a good reason I will generally grant more access, and I would rather not have a bunch of file access permission requests.
 * Configuration documentation and unique feature information should exist in the README. Review the README to gain additional insights into the system. Keep the README up to date, but ALWAYS check first before editing it. I may not want certain information added to the README; it is a public file, so ensure only things that are safe for anyone's eyes are there.
 
-# NixOS Laptop Configuration
-
-## System Overview
-
-- **OS**: NixOS 26.05 (stable); system and Home Manager state versions remain `25.05`
-- **User**: `colum` (wheel, networkmanager, bluetooth, nordvpn groups)
-- **Desktop**: Hyprland (Wayland compositor)
-- **Display manager**: greetd with text-mode tuigreet
-- **Audio**: PipeWire (ALSA + PulseAudio)
-- **Shell**: Bash (managed by Home Manager)
-- **Flake target**: `laptop`
-
-## File Structure
-
-```
-/etc/nixos/
-├── configuration.nix          # NixOS system config (boot, networking, packages, services)
-├── flake.nix                  # Flake inputs and centralized machine profile
-├── flake.lock                 # Locked flake inputs
-├── hardware-configuration.nix # Auto-generated; do not edit manually
-├── home.nix                   # Home Manager: Hyprland, Waybar, Dunst, Hyprpaper, shell, Neovim
-├── AGENTS.md                  # This file
-├── README.md
-└── nvim/                      # NVChad config (placed via xdg.configFile)
-    ├── init.lua
-    ├── lazy-lock.json
-    ├── .stylua.toml
-    └── lua/
-        ├── chadrc.lua         # Theme: onedark
-        ├── mappings.lua       # Custom: ; for cmdline, jk for escape
-        ├── options.lua
-        ├── autocmds.lua
-        ├── configs/
-        │   ├── conform.lua    # Formatter: stylua
-        │   ├── lazy.lua
-        │   └── lspconfig.lua  # LSP: html, cssls
-        └── plugins/
-            └── init.lua       # Plugins: conform, nvim-lspconfig
-```
-
-## How Configuration Works
-
-- `configuration.nix` manages system-level packages and services.
-- `home.nix` manages all user-level config via Home Manager.
-- Hyprland config lives in `home.nix` under `wayland.windowManager.hyprland.settings` and uses `configType = "hyprlang"`.
-- greetd limits tuigreet to UID 1000 and launches the configured Hyprland package's `start-hyprland` after password authentication. This is not autologin.
-- NVChad files are placed with `xdg.configFile`. `lazy-lock.json` is an out-of-store link to `/etc/nixos/nvim/lazy-lock.json`, so `:Lazy sync` updates the Git checkout.
-- Wrapper scripts (`rebuild-nixos`, `opencode-nixos`, `nvim-nixos`) are generated via `pkgs.writeShellScriptBin` in `home.nix`.
+# NixOS Configuration
 
 ## Design Decisions
 

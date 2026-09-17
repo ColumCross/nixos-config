@@ -1,5 +1,6 @@
 #AGENTS.md
 /result
 /tests/
+/private-variables.json
 scripts/__pycache__/
 *.py[cod]

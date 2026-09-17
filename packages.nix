@@ -54,6 +54,12 @@
       fontawesome
       titlesec
     ]))
+
+    # Email Tools
+    aerc
+    lieer
+    notmuch
+
   ];
 
   custom.services.nordvpn.enable = true;

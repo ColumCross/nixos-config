@@ -161,6 +161,7 @@ in
   imports = [ 
     ./home/theming
     ./home/waybar
+    ./home/email.nix
   ];
 
 

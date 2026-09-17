@@ -26,10 +26,16 @@ This README was prepared by GPT-5.6 Sol with human review. It is intended to be 
 |-- hardware-configuration.nix
 |-- home.nix                # Home Manager and the main desktop session
 |-- home/
+|   |-- email.nix           # aerc, Lieer, Notmuch, mail helpers, and sync timer
 |   |-- theming/            # Theme variants and switching
 |   `-- waybar/             # Waybar package and configuration
 |-- hyprland/
 |   `-- keybindings.nix
+|-- mail/
+|   |-- bin/                # Mail setup, sync, status, sending, and launch tools
+|   |-- .opencode/          # Restricted email agent, commands, and mail tools
+|   |-- AGENTS.md           # Email handling and prompt-injection rules
+|   `-- opencode.json       # Mail project's default agent and permissions
 |-- modules/
 |   `-- gtk4-color-scheme.nix
 |-- nvim/                   # NVChad configuration
@@ -45,6 +51,11 @@ This README was prepared by GPT-5.6 Sol with human review. It is intended to be 
 `home.nix` owns the user session and imports the focused theming and Waybar
 modules. Custom scripts are packaged through Home Manager so their runtime
 dependencies are explicit.
+
+Email identities and the external aerc bindings path are stored in the
+owner-only, Git-ignored `/etc/nixos/private-variables.json`. This file is read
+at Home Manager activation time rather than during flake evaluation, preserving
+pure builds and keeping personal values out of Git and the Nix store.
 
 ## Common Commands
 
@@ -107,6 +118,88 @@ links, but `lazy-lock.json` intentionally points directly into this repository:
 This allows `:Lazy sync` to update the tracked lock file. Markdown completion
 is limited to paths, and `bullets.nvim` supplies list continuation and
 renumbering in Markdown, text, and git commit buffers.
+
+### Aerc
+
+aerc is the terminal interface for a local, multi-account Gmail setup. Lieer
+downloads messages and synchronizes Gmail labels, while each account has an
+independent Notmuch database for indexing and search. Gmail remains the remote
+source of truth and continues to work normally in other clients.
+
+Account identities are declared under the `mail` section of the ignored
+`private-variables.json`. During activation, `mail-configure` validates that
+file and generates owner-only account, aerc, and Notmuch configuration under
+`~/.config`. It also links `~/.config/aerc/binds.conf` to the external file
+selected by `mail.aercBindsPath`, allowing the bindings repository to remain
+mutable and outside this Git repository.
+
+Each account uses this runtime layout:
+
+```text
+~/Mail/<account>/                 # Notmuch database root
+|-- gmail/                        # Lieer-managed mail and synchronization state
+`-- local-drafts/                 # Local aerc drafts, not Gmail Drafts
+
+~/.config/notmuch/<account>.conf # Account-specific Notmuch configuration
+~/.local/state/mail/credentials/ # Private Lieer OAuth tokens
+~/.local/state/mail/status/      # Last synchronization result
+~/.local/state/mail/locks/       # Manual and scheduled synchronization locks
+```
+
+Initialize or refresh an account from any directory:
+
+```sh
+mail-setup <gmail-address>
+```
+
+The command validates existing state, initializes Notmuch before Lieer when
+needed, performs browser-based Google OAuth, synchronizes the full mailbox, and
+refreshes aerc's Gmail label views. It never wipes an existing repository.
+OAuth tokens remain outside Git and the Nix store.
+
+Normal synchronization runs every five minutes through one Home Manager user
+timer. Manual and scheduled synchronization use the same per-account locks, so
+they cannot race. Useful commands are:
+
+```sh
+mail-sync all                  # Synchronize all configured accounts
+mail-sync <gmail-address>      # Synchronize one account
+mail-status                    # Show index counts and last sync results
+mail-refresh-folders <account> # Refresh Gmail label views
+aerc                           # Open the terminal mail client
+```
+
+aerc shows standard views such as Inbox, Unread, Starred, Important, Sent,
+Drafts, All Mail, Spam, and Trash. Account-specific query maps also include all
+normal Gmail labels, including empty labels and nested labels. Gmail category
+tabs such as Promotions and Social are intentionally excluded. Label maps are
+refreshed after successful synchronization and become visible after restarting
+aerc.
+
+`Marked for Deletion` is the single custom classification. It is a real Gmail
+label, but only a human-operated command may apply it; the email assistant may
+only propose it. It provides a review queue and is distinct from Gmail Trash.
+Applying the `trash` tag removes Inbox membership on the next Lieer sync and
+moves the message to Gmail Trash, where Gmail's normal retention policy applies.
+
+The account-specific `mail-send` wrapper connects aerc's sendmail transport to
+`gmi send`. Gmail supplies the synchronized Sent copy, avoiding duplicate local
+copies. HTML mail is converted to text offline, remote links are not parsed
+automatically, and drafts remain local unless separately implemented.
+
+Open the restricted email assistant with:
+
+```sh
+mail-assistant
+```
+
+It starts OpenCode in `~/Mail` with a dedicated default-deny email agent. The
+agent can only search mail metadata, read one message, read a bounded thread,
+inspect synchronization status, and save a private note. It cannot invoke a
+shell, send or synchronize mail, alter labels, archive, delete, or access Lieer
+OAuth state. `/mail-find`, `/mail-review`, and `/mail-draft` provide optional
+shortcuts. Message content selected by these tools is sent to the configured AI
+model provider; local storage does not make model inference local.
 
 # Custom Features
 
