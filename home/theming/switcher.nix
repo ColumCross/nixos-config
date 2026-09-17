@@ -10,6 +10,7 @@ let
       kitty
       libnotify
       procps
+      systemd
     ];
     text = ''
       new="$1"
@@ -70,7 +71,7 @@ let
       ln -sfnT "$HOME/.config/waybar/styles/$new.css" "$HOME/.config/waybar/styles/current.css"
       pkill -SIGUSR2 waybar || true
       ln -sfnT "$HOME/.config/dunst/dunstrc.d/$new.conf" "$HOME/.config/dunst/dunstrc.d/current-theme.conf"
-      dunstctl reload || true
+      systemctl --user restart dunst.service
       ln -sfnT "$HOME/.config/rofi/themes/$new.rasi" "$HOME/.config/rofi/themes/current.rasi"
       ln -sfnT "$HOME/.config/wlogout/styles/$new.css" "$HOME/.config/wlogout/style.css"
     '';

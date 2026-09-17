@@ -76,6 +76,17 @@ nix build --no-link /etc/nixos#nixosConfigurations.laptop.config.system.build.to
 The graphical rebuild shortcut runs `rebuild-nixos`. Its terminal remains open
 after the rebuild and failed output is copied to the clipboard.
 
+### Git Commands
+
+These Bash aliases are available from any directory:
+
+| Command | Equivalent | Description |
+|---|---|---|
+| `gco` | `git checkout` | Switch branches or restore files |
+| `gs` | `git status` | Show the working tree status |
+| `gl` | `git log --oneline -10` | Show the ten most recent commits |
+| `gp` | `git push` | Push commits to the configured remote |
+
 ## Keybindings
 
 | Shortcut | Action |
@@ -277,6 +288,11 @@ systemd-inhibit --list
 
 Restart OpenCode after activating a plugin change.
 
+## Battery Warning Notification
+
+While discharging, Dunst sends one critical notification when any battery reaches
+10% or lower. It rearms after charging begins or the level rises above 10%.
+
 # Hardware Notes
 
 ## HP USB-C/A Universal Dock G2
@@ -328,12 +344,14 @@ These constraints are easy to miss when changing the configuration:
 
 ## Troubleshooting
 
-If the desktop theme is incomplete, run `set-theme dark`. A wallpaper failure
+- If the desktop theme is incomplete, run `set-theme dark`. A wallpaper failure
 is reported through Dunst; the active state is in `~/.cache/current-theme`.
 
-If Lazy cannot update its lock file, verify that
+- If Lazy cannot update its lock file, verify that
 `~/.config/nvim/lazy-lock.json` resolves to `/etc/nixos/nvim/lazy-lock.json`, not
 to an immutable Nix store path.
 
-If greetd does not show the expected account, compare the user's numeric UID
+- If greetd does not show the expected account, compare the user's numeric UID
 with the UID 1000 restriction in `configuration.nix`.
+
+- **Dunst theme and activation changes**: Restart `dunst.service` rather than using `dunstctl reload` after changing its theme selector symlink. Home Manager activation must also refresh the running service after replacing its generated configuration.

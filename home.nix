@@ -76,6 +76,45 @@ let
     '';
   };
 
+  notification-sound-play = pkgs.writeShellApplication {
+    name = "notification-sound-play";
+    runtimeInputs = [ notification-sound-control ];
+    text = ''
+      exec notification-sound-control play
+    '';
+  };
+
+  battery-low-notification = pkgs.writeShellApplication {
+    name = "battery-low-notification";
+    runtimeInputs = [ pkgs.coreutils pkgs.libnotify ];
+    text = ''
+      latch="$XDG_RUNTIME_DIR/battery-low-notified"
+      lowest_capacity=101
+
+      for battery in /sys/class/power_supply/BAT*; do
+        [ -r "$battery/capacity" ] && [ -r "$battery/status" ] || continue
+        capacity="$(cat "$battery/capacity")"
+        status="$(cat "$battery/status")"
+
+        if ! [ "$capacity" -eq "$capacity" ] 2>/dev/null; then
+          continue
+        fi
+
+        if [ "$status" = Discharging ] && [ "$capacity" -le 10 ] && [ "$capacity" -lt "$lowest_capacity" ]; then
+          lowest_capacity="$capacity"
+        fi
+      done
+
+      if [ "$lowest_capacity" -le 10 ]; then
+        [ -f "$latch" ] && exit 0
+        touch "$latch"
+        notify-send --app-name=Battery --urgency=critical "Low battery" "Battery level is $lowest_capacity%. Plug in your charger."
+      else
+        rm -f "$latch"
+      fi
+    '';
+  };
+
   launch-pavucontrol = pkgs.writeShellApplication {
     name = "launch-pavucontrol";
     runtimeInputs = [ pkgs.pavucontrol pkgs.systemd ];
@@ -434,7 +473,7 @@ in
       urgency_critical.timeout = 0;
 
       notification-sound = {
-        script = "${notification-sound-control}/bin/notification-sound-control play";
+        script = "${notification-sound-play}/bin/notification-sound-play";
       };
     };
   };
@@ -445,6 +484,35 @@ in
       Restart = "on-failure";
       RestartSec = 2;
     };
+  };
+
+  # Dunst resolves theme fragments at startup, so refresh it after activation.
+  home.activation.restartDunst = lib.hm.dag.entryAfter [ "reloadSystemd" ] ''
+    $DRY_RUN_CMD ${pkgs.systemd}/bin/systemctl --user try-restart dunst.service
+  '';
+
+  systemd.user.services.battery-low-notification = {
+    Unit = {
+      Description = "Notify when the battery is low";
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${battery-low-notification}/bin/battery-low-notification";
+    };
+  };
+
+  systemd.user.timers.battery-low-notification = {
+    Unit = {
+      Description = "Check battery level for low-battery notifications";
+      PartOf = [ "graphical-session.target" ];
+    };
+    Timer = {
+      OnActiveSec = "1min";
+      OnUnitActiveSec = "1min";
+      Unit = "battery-low-notification.service";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
   };
 
   # ==========================================
