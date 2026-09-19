@@ -74,6 +74,7 @@ let
       systemctl --user restart dunst.service
       ln -sfnT "$HOME/.config/rofi/themes/$new.rasi" "$HOME/.config/rofi/themes/current.rasi"
       ln -sfnT "$HOME/.config/wlogout/styles/$new.css" "$HOME/.config/wlogout/style.css"
+      pkill -SIGUSR2 -f '^([^[:space:]]*/)?opencode([[:space:]]|$)' || true
     '';
   };
 in {

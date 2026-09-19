@@ -97,7 +97,7 @@ These Bash aliases are available from any directory:
 | `SUPER+SHIFT+L` | Lock the session |
 | `SUPER+ALT+L` | Toggle the dark/light theme |
 | `SUPER+CTRL+SHIFT+R` | Open the rebuild wrapper |
-| `SUPER+CTRL+C` | Open OpenCode in `/etc/nixos` |
+| `SUPER+CTRL+C` | Open the OpenCode and editor Neovim workspace in `/etc/nixos` |
 | `SUPER+CTRL+SHIFT+C` | Open Neovim in `/etc/nixos` |
 | `SUPER+1` through `SUPER+0` | Select desktop 1 through 10 |
 | `SUPER+SHIFT+1` through `SUPER+SHIFT+0` | Move the active window to desktop 1 through 10 |
@@ -272,6 +272,13 @@ audio, and the setting returns to enabled after logout or reboot.
 
 OpenCode uses Dunst for attention notifications, so it follows the same sound
 setting rather than playing a separate TUI sound.
+
+When OpenCode runs inside a Neovim terminal, it sends direct Dunst notifications
+for completed sessions, prompts, and errors only while its containing Kitty
+window is unfocused. Nested OpenCode sessions also follow live theme switches.
+
+`SUPER+CTRL+C` opens two real Neovim tabpages in `/etc/nixos`: an initially
+active OpenCode terminal and a `[No Name]` editor alongside the directory tree.
 
 ## OpenCode Sleep Inhibition
 

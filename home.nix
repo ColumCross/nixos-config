@@ -138,6 +138,15 @@ let
     sleep = "${pkgs.coreutils}/bin/sleep";
   };
 
+  desktop-notifications = pkgs.replaceVars ./opencode/plugins/desktop-notifications.js {
+    hyprctl = "${pkgs.hyprland}/bin/hyprctl";
+    notifySend = "${pkgs.libnotify}/bin/notify-send";
+  };
+
+  desktop-theme = pkgs.replaceVars ./opencode/tui-plugins/desktop-theme.js {
+    themeStateFile = "${config.home.homeDirectory}/.cache/current-theme";
+  };
+
   rabcor-hb-mid = pkgs.fetchurl {
     url = "https://raw.githubusercontent.com/Rabcor/Heavy-Bass-EE/3d5471a728eded83b165905a92cd959415eda1f4/HB-Mid.json";
     hash = "sha256-0eIReSFJKQNWiG/mUmmgC8od9TCWckIrMnH/9Y55cgA=";
@@ -230,7 +239,13 @@ in
     '')
     (pkgs.writeShellScriptBin "nvim-nixos" ''
       cd "${profile.configDirectory}"
-      exec nvim .
+
+      if [ "$#" -eq 0 ]; then
+       exec nvim .
+      fi
+      
+      exec nvim "$@"
+
     '')
   ];
 
@@ -408,6 +423,7 @@ in
         "nm-applet"
         "blueman-applet"
         "workspace-topology"
+        "/run/current-system/sw/bin/nordvpn status >/dev/null 2>&1"
       ];
 
       inherit (hyprlandKeybindings) bind bindel bindl bindm;
@@ -490,6 +506,11 @@ in
   home.activation.restartDunst = lib.hm.dag.entryAfter [ "reloadSystemd" ] ''
     $DRY_RUN_CMD ${pkgs.systemd}/bin/systemctl --user try-restart dunst.service
   '';
+  home.activation.refreshNordvpnTray =
+    lib.hm.dag.entryAfter [ "reloadSystemd" ] ''
+      $DRY_RUN_CMD /run/current-system/sw/bin/nordvpn status >/dev/null 2>&1 ||
+        echo "Warning: unable to start the NordVPN tray process" >&2
+  '';
 
   systemd.user.services.battery-low-notification = {
     Unit = {
@@ -525,6 +546,7 @@ in
         lock_cmd = "pidof hyprlock || hyprlock";
         before_sleep_cmd = "loginctl lock-session";
         after_sleep_cmd = "hyprctl dispatch dpms on";
+        on_unlock_cmd = "/run/current-system/sw/bin/nordvpn status >/dev/null 2>&1";
         ignore_systemd_inhibit = false;
       };
 
@@ -665,6 +687,7 @@ in
     # OpenCode TUI config
     "opencode/tui.json".text = builtins.toJSON {
       "$schema" = "https://opencode.ai/tui.json";
+      plugin = [ "./tui-plugins/desktop-theme.js" ];
       attention = {
         enabled = true;
         notifications = true;
@@ -672,6 +695,8 @@ in
       };
     };
     "opencode/plugins/active-sleep-inhibit.js".source = active-sleep-inhibit;
+    "opencode/plugins/desktop-notifications.js".source = desktop-notifications;
+    "opencode/tui-plugins/desktop-theme.js".source = desktop-theme;
 
     "spotify-player/app.toml".source = ./spotify-player/app.toml;
 

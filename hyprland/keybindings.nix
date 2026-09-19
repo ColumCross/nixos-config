@@ -1,4 +1,20 @@
-{
+let
+  neovimOpenCodeCommands = [
+    "setlocal bufhidden=wipe"
+    "terminal opencode-nixos"
+    "setlocal bufhidden=wipe"
+    "file opencode://opencode"
+    "tabnew"
+    "NvimTreeToggle"
+    "wincmd p"
+    "tabnext 1"
+    "startinsert"
+  ];
+
+  neovimOpenCodeArgs = builtins.concatStringsSep " " (
+    builtins.map (command: "-c \"${command}\"") neovimOpenCodeCommands
+  );
+in {
   bind = [
     "$mainMod, T, exec, $terminal"
     "$mainMod, SPACE, exec, $menu"
@@ -16,8 +32,8 @@
     # Rebuild NixOS
     "$mainMod CTRL SHIFT, R, exec, kitty --class nixos-rebuild -e rebuild-nixos"
 
-    # OpenCode in the configured NixOS directory
-    "$mainMod CTRL, C, exec, kitty --class opencode -e opencode-nixos"
+    # OpenCode and editor workspace in the configured NixOS directory
+    "$mainMod CTRL, C, exec, kitty --class neovim-edit -e nvim-nixos ${neovimOpenCodeArgs}"
 
     # Neovim in the configured NixOS directory
     "$mainMod CTRL SHIFT, C, exec, kitty --class neovim-edit -e nvim-nixos"
