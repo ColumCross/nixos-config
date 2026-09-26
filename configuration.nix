@@ -12,7 +12,16 @@
 
   services.udisks2.enable = true;
 
-  services.logind.settings.Login.HandlePowerKey = "suspend";
+  services.logind.settings.Login = {
+    HandlePowerKey = "hibernate";
+    HandleLidSwitch = "suspend-then-hibernate";
+    HandleLidSwitchDocked = "ignore";
+  };
+
+  systemd.sleep.settings.Sleep = {
+    HibernateDelaySec = "1h";
+    HibernateOnACPower = false;
+  };
 
   # The HP USB-C/A Universal Dock G2 drives its external displays through
   # DisplayLink. The NixOS module supplies EVDI, udev rules, and power hooks.
