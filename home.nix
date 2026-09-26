@@ -270,6 +270,10 @@ in
     remove_if_managed_hb_mid "$HOME/.local/share/easyeffects/output/HB-Mid.json.backup"
   '';
 
+  home.activation.invalidateKServiceCache = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm -f "$HOME"/.cache/ksycoca6_*
+  '';
+
   programs.git = {
     enable = true;
     settings.credential.helper = "store";

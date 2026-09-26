@@ -21,6 +21,10 @@
     md-tui
     btop
     vlc
+    element-desktop
+
+    system-config-printer
+    pandoc
 
     # Desktop utilities
     rofi

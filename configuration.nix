@@ -82,6 +82,18 @@
   };
 
   #################################
+  ## Other Services 
+  #################################
+
+  services.printing.enable = true;
+
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    openFirewall = true;
+  };
+
+  #################################
   ## XDG Portal
   #################################
 
@@ -91,6 +103,18 @@
       pkgs.xdg-desktop-portal-gtk
     ];
   };
+
+  environment.etc."xdg/menus/applications.menu".text = ''
+    <!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"
+      "http://www.freedesktop.org/standards/menu-spec/menu-1.0.dtd">
+    <Menu>
+      <Name>Applications</Name>
+      <DefaultAppDirs/>
+      <Include>
+        <All/>
+      </Include>
+    </Menu>
+  '';
 
   #################################
   ## Hyprland
