@@ -44,6 +44,7 @@
     adwaita-icon-theme
     kdePackages.dolphin
     easyeffects
+    gimp
 
     # Disk utilities
     gptfdisk
