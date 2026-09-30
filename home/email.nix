@@ -44,7 +44,7 @@ let
   };
   mail-assistant = pkgs.writeShellApplication {
     name = "mail-assistant";
-    runtimeInputs = [ pkgs.bubblewrap pkgs.coreutils pkgs.opencode ];
+    runtimeInputs = [ pkgs.opencode ];
     text = builtins.readFile ../mail/bin/mail-assistant.sh;
   };
 in
@@ -55,16 +55,10 @@ in
     "Mail/AGENTS.md".source = ../mail/AGENTS.md;
     "Mail/opencode.json".source = ../mail/opencode.json;
     "Mail/.opencode/agents/email.md".source = ../mail/.opencode/agents/email.md;
-    "Mail/.opencode/commands/mail-review.md".source = ../mail/.opencode/commands/mail-review.md;
-    "Mail/.opencode/commands/mail-find.md".source = ../mail/.opencode/commands/mail-find.md;
-    "Mail/.opencode/commands/mail-draft.md".source = ../mail/.opencode/commands/mail-draft.md;
-    "Mail/.opencode/tools/common.ts".source = ../mail/.opencode/tools/common.ts;
-    "Mail/.opencode/tools/common-core.ts".source = ../mail/.opencode/tools/common-core.ts;
-    "Mail/.opencode/tools/mail_search.ts".source = ../mail/.opencode/tools/mail_search.ts;
-    "Mail/.opencode/tools/mail_read.ts".source = ../mail/.opencode/tools/mail_read.ts;
-    "Mail/.opencode/tools/mail_thread.ts".source = ../mail/.opencode/tools/mail_thread.ts;
-    "Mail/.opencode/tools/mail_status.ts".source = ../mail/.opencode/tools/mail_status.ts;
-    "Mail/.opencode/tools/mail_save_note.ts".source = ../mail/.opencode/tools/mail_save_note.ts;
+    "Mail/.opencode/tools/mail.ts".text = builtins.replaceStrings
+      [ "\"@opencode-ai/plugin\"" ]
+      [ "\"${mailRoot}/.opencode/node_modules/@opencode-ai/plugin/dist/tool.js\"" ]
+      (builtins.readFile ../mail/.opencode/tools/mail.ts);
   };
 
   home.activation.mailDirectories = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

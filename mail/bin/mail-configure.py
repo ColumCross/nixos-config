@@ -76,7 +76,7 @@ if not binds_path.is_absolute() or not binds_path.is_file() or not os.access(bin
     fail("mail.aercBindsPath must be an absolute readable binds.conf file")
 
 BASE_QUERY_MAP = """Inbox=tag:inbox
-Unread=tag:unread
+Unread=tag:unread and tag:inbox
 Starred=tag:flagged
 Important=tag:important
 Sent=tag:sent
@@ -116,12 +116,15 @@ for entry in accounts:
 source = notmuch://{home}/Mail/{account}
 query-map = {aerc_config}/{account}.query-map
 exclude-tags = spam,trash
+folders-sort = Unread,Starred,Inbox,Marked for Deletion
 default = Inbox
 from = {identities[0]}
 aliases = {','.join(identities)}
 outgoing = mail-send {account}
 postpone = local-drafts
 check-mail = 0
+check-mail-cmd = mail-sync {account}
+check-mail-timeout = 30m
 restrict-delete = true
 """
     )

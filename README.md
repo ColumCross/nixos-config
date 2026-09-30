@@ -187,11 +187,10 @@ tabs such as Promotions and Social are intentionally excluded. Label maps are
 refreshed after successful synchronization and become visible after restarting
 aerc.
 
-`Marked for Deletion` is the single custom classification. It is a real Gmail
-label, but only a human-operated command may apply it; the email assistant may
-only propose it. It provides a review queue and is distinct from Gmail Trash.
-Applying the `trash` tag removes Inbox membership on the next Lieer sync and
-moves the message to Gmail Trash, where Gmail's normal retention policy applies.
+`Marked for Deletion` is a real Gmail label and provides a review queue distinct
+from Gmail Trash. Applying the `trash` tag removes Inbox membership on the next
+Lieer sync and moves the message to Gmail Trash, where Gmail's normal retention
+policy applies.
 
 The account-specific `mail-send` wrapper connects aerc's sendmail transport to
 `gmi send`. Gmail supplies the synchronized Sent copy, avoiding duplicate local
@@ -205,12 +204,13 @@ mail-assistant
 ```
 
 It starts OpenCode in `~/Mail` with a dedicated default-deny email agent. The
-agent can only search mail metadata, read one message, read a bounded thread,
-inspect synchronization status, and save a private note. It cannot invoke a
-shell, send or synchronize mail, alter labels, archive, delete, or access Lieer
-OAuth state. `/mail-find`, `/mail-review`, and `/mail-draft` provide optional
-shortcuts. Message content selected by these tools is sent to the configured AI
-model provider; local storage does not make model inference local.
+agent can search and read mail, list labels, star or unstar mail, change read
+and important state, archive, restore to Inbox, mark spam, move mail between
+Gmail labels, and apply or remove `Marked for Deletion`. It can synchronize with
+Gmail only when explicitly requested. It cannot invoke a shell, compose, reply,
+send, move mail to Trash, permanently delete mail, or access Lieer OAuth state.
+Message content selected by these tools is sent to the configured AI model
+provider; local storage does not make model inference local.
 
 # Custom Features
 

@@ -11,14 +11,14 @@
   "agent": {
     "email": {
       "mode": "primary",
-      "description": "Searches, reads, summarizes, classifies, and drafts replies from configured local mail only.",
+      "description": "Manages configured local Gmail mailboxes through Notmuch labels and on-request synchronization, without sending or deleting email.",
       "permission": {
         "*": "deny",
         "mail_search": "allow",
         "mail_read": "allow",
-        "mail_thread": "allow",
-        "mail_status": "allow",
-        "mail_save_note": "allow"
+        "mail_labels": "allow",
+        "mail_update": "allow",
+        "mail_sync": "allow"
       }
     }
   }

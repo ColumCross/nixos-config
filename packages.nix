@@ -14,7 +14,7 @@
     gnumake
     unzip
     wl-clipboard
-    kalker
+    fend
     gh
     sl
     fastfetch

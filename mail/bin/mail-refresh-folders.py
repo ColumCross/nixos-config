@@ -26,7 +26,7 @@ SYSTEM_LABELS = {
 }
 STATIC_VIEWS = [
     ("Inbox", "tag:inbox"),
-    ("Unread", "tag:unread"),
+    ("Unread", "tag:unread and tag:inbox"),
     ("Starred", "tag:flagged"),
     ("Important", "tag:important"),
     ("Sent", "tag:sent"),
