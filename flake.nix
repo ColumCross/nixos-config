@@ -5,12 +5,15 @@
   description = "Reusable NixOS and Home Manager configuration";
 
   inputs = {
+
+    # external flake packages
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
-    claude-desktop.url = "github:aaddrick/claude-desktop-debian";
     opencode.url = "github:anomalyco/opencode";
     hyprKCS.url = "github:kosa12/hyprKCS";
     fast.url = "github:maaslalani/fast";
+    herdr.url = "github:herdrdev/herdr/v0.9.3";
+
     spotify-player = {
       url = "github:aome510/spotify-player/6f94188ed6aae0d9c2cfecc25a434fc36a322df5";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -26,17 +29,18 @@
     };
   };
 
+  # external flake packages
   outputs = {
     self,
     nixpkgs,
     nixpkgs-unstable,
     home-manager,
-    claude-desktop,
     opencode,
     hyprKCS,
     fast,
     spotify-player,
     nordvpn-module,
+    herdr,
     ...
   }:
   let
@@ -57,7 +61,19 @@
     nixosConfigurations.${profile.flakeName} = nixpkgs.lib.nixosSystem {
       inherit system;
 
-      specialArgs = { inherit profile unstablePkgs nordvpn-module spotifyPlayerPackage; };
+    # external flake packages
+    specialArgs = {
+      inherit
+        profile
+        unstablePkgs
+        nordvpn-module
+        spotifyPlayerPackage
+        opencode
+        hyprKCS
+        fast
+        herdr
+        ;
+    };
 
 	pkgs = import nixpkgs {
 		inherit system;
@@ -65,14 +81,6 @@
 	};
 
   modules = [
-    ({ pkgs, ... }: {
-      environment.systemPackages = [ 
-		    claude-desktop.packages.${system}.default
-        opencode.packages.${system}.default
-        hyprKCS.packages.${system}.default
-        fast.packages.${system}.default
-	    ];
-	  })
         ./configuration.nix
         ./modules/gtk4-color-scheme.nix
 

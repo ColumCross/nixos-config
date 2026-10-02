@@ -1,7 +1,27 @@
-{ pkgs, profile, spotifyPlayerPackage, ... }:
+# external flake packages
+{
+  pkgs,
+  profile,
+  spotifyPlayerPackage,
+  opencode,
+  hyprKCS,
+  fast,
+  herdr,
+  ...
+}:
 
+let
+  system = pkgs.stdenv.hostPlatform.system;
+in
 {
   environment.systemPackages = with pkgs; [
+    # external flake packages
+    opencode.packages.${system}.default
+    hyprKCS.packages.${system}.default
+    fast.packages.${system}.default
+    herdr.packages.${system}.default
+
+    # NixOS Packages
     git
     kitty
     google-chrome
