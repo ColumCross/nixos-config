@@ -24,6 +24,8 @@ let
   laptopPanelHeight = 1080;
   dockedLaptopX = builtins.floor ((2 * externalMonitorLogicalWidth - laptopPanelWidth) / 2);
   dockedLaptopY = externalMonitorLogicalHeight;
+  dockedLaptopMonitorRule = "eDP-1,${toString laptopPanelWidth}x${toString laptopPanelHeight}@60,${toString dockedLaptopX}x${toString dockedLaptopY},1";
+  undockedLaptopMonitorRule = "eDP-1,preferred,0x0,1";
 
   workspace-control = pkgs.writeShellApplication {
     name = "workspace-control";
@@ -40,7 +42,9 @@ let
     name = "workspace-topology";
     runtimeInputs = [ pkgs.python3 ];
     text = ''
-      exec python3 ${./scripts/workspace-topology.py}
+      export WORKSPACE_TOPOLOGY_DOCKED_LAPTOP_RULE=${lib.escapeShellArg dockedLaptopMonitorRule}
+      export WORKSPACE_TOPOLOGY_UNDOCKED_LAPTOP_RULE=${lib.escapeShellArg undockedLaptopMonitorRule}
+      exec python3 ${./scripts/workspace-topology.py} "$@"
     '';
   };
 
@@ -327,7 +331,7 @@ in
       monitor = [
         "desc:HP Inc. HP E243 CNC8501MRZ,${externalMonitorMode},0x0,${toString externalMonitorScale}"
         "desc:HP Inc. HP E243 CNK828106Z,${externalMonitorMode},${toString externalMonitorLogicalWidth}x0,${toString externalMonitorScale}"
-        "eDP-1,${toString laptopPanelWidth}x${toString laptopPanelHeight}@60,${toString dockedLaptopX}x${toString dockedLaptopY},1"
+        dockedLaptopMonitorRule
         ",preferred,auto,1"
       ];
 
@@ -426,7 +430,6 @@ in
       exec-once = [
         "nm-applet"
         "blueman-applet"
-        "workspace-topology"
         "/run/current-system/sw/bin/nordvpn status >/dev/null 2>&1"
       ];
 
@@ -442,6 +445,20 @@ in
         "match:class ^(kitty)$, rounding 5, suppress_event fullscreen"
       ];
     };
+  };
+
+  systemd.user.services.workspace-topology = {
+    Unit = {
+      Description = "Reconcile Hyprland dock and lid monitor layout";
+      After = [ "hyprland-session.target" ];
+      PartOf = [ "hyprland-session.target" ];
+    };
+    Service = {
+      ExecStart = "${workspace-topology}/bin/workspace-topology listen";
+      Restart = "on-failure";
+      RestartSec = 1;
+    };
+    Install.WantedBy = [ "hyprland-session.target" ];
   };
 
   # ==========================================
@@ -656,18 +673,10 @@ in
       case "$1" in
           "close")
               pidof hyprlock || hyprlock
-              external_monitors=$(hyprctl monitors -j | ${pkgs.jq}/bin/jq '[.[] | select(.name != "eDP-1")] | length')
-              if [ "$external_monitors" -gt 0 ]; then
-                  hyprctl keyword monitor "eDP-1,disable"
-              fi
+              ${workspace-topology}/bin/workspace-topology lid close
               ;;
           "open")
-              external_monitors=$(hyprctl monitors -j | ${pkgs.jq}/bin/jq '[.[] | select(.name != "eDP-1")] | length')
-              if [ "$external_monitors" -ge 2 ]; then
-                  hyprctl keyword monitor "eDP-1,${toString laptopPanelWidth}x${toString laptopPanelHeight}@60,${toString dockedLaptopX}x${toString dockedLaptopY},1"
-              else
-                  hyprctl keyword monitor "eDP-1,preferred,0x0,1"
-              fi
+              ${workspace-topology}/bin/workspace-topology lid open
               hyprctl dispatch dpms on
               ;;
           *)

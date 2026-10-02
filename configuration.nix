@@ -102,6 +102,8 @@
     openFirewall = true;
   };
 
+  programs.nix-ld.enable = true;
+
   #################################
   ## XDG Portal
   #################################

@@ -4,28 +4,35 @@ import os
 import socket
 import subprocess
 import sys
+import time
 
 
 LEFT_DISPLAY = "HP Inc. HP E243 CNC8501MRZ"
 RIGHT_DISPLAY = "HP Inc. HP E243 CNK828106Z"
 LAPTOP_DISPLAY = "eDP-1"
+LID_STATE_PATH = "/proc/acpi/button/lid/LID0/state"
 
 
 class TopologyError(RuntimeError):
     pass
 
 
-def targets(monitors):
+def targets(monitors, include_laptop=True):
     names = {monitor.get("description"): monitor["name"] for monitor in monitors}
     laptop = next((monitor["name"] for monitor in monitors if monitor.get("name") == LAPTOP_DISPLAY), None)
     left = names.get(LEFT_DISPLAY)
     right = names.get(RIGHT_DISPLAY)
     if left and right:
         result = {"1": left, "2": right}
-        if laptop:
+        if laptop and include_laptop:
             result["3"] = laptop
         return result
-    return {"1": laptop} if laptop else {}
+    return {"1": laptop} if laptop and include_laptop else {}
+
+
+def displays(monitors):
+    names = {monitor.get("description"): monitor["name"] for monitor in monitors}
+    return names.get(LEFT_DISPLAY), names.get(RIGHT_DISPLAY)
 
 
 class Controller:
@@ -64,14 +71,37 @@ class Controller:
             raise TopologyError("Hyprland returned an invalid active workspace")
         return workspace
 
-    def apply(self):
+    def lid_is_open(self):
+        try:
+            with open(LID_STATE_PATH, encoding="utf-8") as lid_state:
+                return lid_state.read().strip().endswith("open")
+        except OSError:
+            return True
+
+    def reconcile_monitor(self, monitors, lid_open):
+        left, right = displays(monitors)
+        laptop = next((monitor["name"] for monitor in monitors if monitor.get("name") == LAPTOP_DISPLAY), None)
+        if not laptop:
+            return
+        if not lid_open and (left or right):
+            self.run(["hyprctl", "keyword", "monitor", f"{LAPTOP_DISPLAY},disable"])
+        elif left and right:
+            self.run(["hyprctl", "keyword", "monitor", os.environ["WORKSPACE_TOPOLOGY_DOCKED_LAPTOP_RULE"]])
+        else:
+            self.run(["hyprctl", "keyword", "monitor", os.environ["WORKSPACE_TOPOLOGY_UNDOCKED_LAPTOP_RULE"]])
+
+    def apply(self, lid_open=None):
+        monitors = self.monitors()
+        lid_open = self.lid_is_open() if lid_open is None else lid_open
+        self.reconcile_monitor(monitors, lid_open)
         active = self.active_workspace()
-        assignments = targets(self.monitors())
+        assignments = targets(monitors, include_laptop=lid_open)
         for workspace, monitor in assignments.items():
             self.dispatch("workspace", f"name:{workspace}")
             self.dispatch("moveworkspacetomonitor", f"name:{workspace}", monitor)
         if assignments:
-            self.dispatch("workspace", f"id:{active['id']}")
+            selector = str(active["id"]) if active["id"] > 0 else f"name:{active['name']}"
+            self.dispatch("workspace", selector)
 
 
 def listen(controller):
@@ -86,12 +116,25 @@ def listen(controller):
         with event_socket.makefile(encoding="utf-8") as events:
             for event in events:
                 if event.startswith(("monitoradded", "monitorremoved")):
+                    time.sleep(0.5)
                     controller.apply()
+
+
+def main(arguments):
+    controller = Controller()
+    if arguments == ["listen"]:
+        listen(controller)
+    elif arguments == ["lid", "open"]:
+        controller.apply(lid_open=True)
+    elif arguments == ["lid", "close"]:
+        controller.apply(lid_open=False)
+    else:
+        raise TopologyError("Invalid workspace-topology command")
 
 
 if __name__ == "__main__":
     try:
-        listen(Controller())
+        main(sys.argv[1:])
     except TopologyError as error:
         print(f"workspace-topology: {error}", file=sys.stderr)
         sys.exit(1)
