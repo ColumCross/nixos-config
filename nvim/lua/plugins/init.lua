@@ -31,6 +31,15 @@ return {
     opts = {},
   },
 
+  {
+    "sindrets/diffview.nvim",
+    cmd = {
+      "DiffviewOpen",
+      "DiffviewClose",
+      "DiffviewFileHistory",
+    },
+  },
+
   -- test new blink
   -- { import = "nvchad.blink.lazyspec" },
 

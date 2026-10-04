@@ -1,7 +1,6 @@
 const themeStateFile = "@themeStateFile@"
 
 const tui = async (api) => {
-  if (!process.env.NVIM) return
 
   const sync = async () => {
     try {
