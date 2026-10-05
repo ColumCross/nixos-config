@@ -55,7 +55,7 @@ class Controller:
 
     def monitors(self):
         try:
-            monitors = json.loads(self.run(["hyprctl", "monitors", "-j"]))
+            monitors = json.loads(self.run(["hyprctl", "monitors", "all", "-j"]))
         except json.JSONDecodeError as error:
             raise TopologyError(f"Invalid monitor JSON: {error.msg}") from error
         if not isinstance(monitors, list):
@@ -80,9 +80,6 @@ class Controller:
 
     def reconcile_monitor(self, monitors, lid_open):
         left, right = displays(monitors)
-        laptop = next((monitor["name"] for monitor in monitors if monitor.get("name") == LAPTOP_DISPLAY), None)
-        if not laptop:
-            return
         if not lid_open and (left or right):
             self.run(["hyprctl", "keyword", "monitor", f"{LAPTOP_DISPLAY},disable"])
         elif left and right:
@@ -94,8 +91,10 @@ class Controller:
         monitors = self.monitors()
         lid_open = self.lid_is_open() if lid_open is None else lid_open
         self.reconcile_monitor(monitors, lid_open)
+        monitors = self.monitors()
         active = self.active_workspace()
-        assignments = targets(monitors, include_laptop=lid_open)
+        include_laptop = lid_open or not any(displays(monitors))
+        assignments = targets(monitors, include_laptop=include_laptop)
         for workspace, monitor in assignments.items():
             self.dispatch("workspace", f"name:{workspace}")
             self.dispatch("moveworkspacetomonitor", f"name:{workspace}", monitor)

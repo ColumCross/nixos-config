@@ -56,6 +56,7 @@ Email identities and the external aerc bindings path are stored in the
 owner-only, Git-ignored `/etc/nixos/private-variables.json`. This file is read
 at Home Manager activation time rather than during flake evaluation, preserving
 pure builds and keeping personal values out of Git and the Nix store.
+Git identity is also sourced from this private runtime file.
 
 ## Common Commands
 

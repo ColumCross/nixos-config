@@ -40,6 +40,15 @@ return {
     },
   },
 
+  {
+    "nvim-tree/nvim-tree.lua",
+    opts = {
+      filters = {
+        git_ignored = false,
+      },
+    },
+  },
+
   -- test new blink
   -- { import = "nvchad.blink.lazyspec" },
 

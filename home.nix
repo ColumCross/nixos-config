@@ -6,6 +6,14 @@
 let
   flakeReference = "${profile.configDirectory}#${profile.flakeName}";
 
+  git-configure = pkgs.writeShellApplication {
+    name = "git-configure";
+    runtimeInputs = [ pkgs.git pkgs.python3 ];
+    text = ''
+      exec python3 ${./scripts/git-configure.py}
+    '';
+  };
+
   # Monitor settings
 
   externalMonitorScalePresets = {
@@ -278,9 +286,16 @@ in
     $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm -f "$HOME"/.cache/ksycoca6_*
   '';
 
+  home.activation.gitConfiguration = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    $DRY_RUN_CMD ${git-configure}/bin/git-configure
+  '';
+
   programs.git = {
     enable = true;
-    settings.credential.helper = "store";
+    settings = {
+      credential.helper = "store";
+      include.path = "${profile.homeDirectory}/.config/git/identity";
+    };
   };
 
   programs.kitty = {
@@ -672,8 +687,8 @@ in
       #!/bin/sh
       case "$1" in
           "close")
-              pidof hyprlock || hyprlock
               ${workspace-topology}/bin/workspace-topology lid close
+              pidof hyprlock || hyprlock
               ;;
           "open")
               ${workspace-topology}/bin/workspace-topology lid open
