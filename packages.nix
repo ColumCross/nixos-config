@@ -84,6 +84,7 @@ in
     aerc
     lieer
     notmuch
+    chawan
 
   ];
 

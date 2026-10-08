@@ -121,8 +121,8 @@ in
             warning = 30;
             critical = 15;
           };
-          format = "BAT {capacity}%";
-          format-charging = "BAT {capacity}% 󰂄";
+          format = "BAT {capacity}% {time}";
+          format-charging = "BAT {capacity}% 󰂄 {time}";
           format-plugged = "BAT {capacity}% 󰂄";
           format-icons = [ "" "" "" "" "" ];
         };
