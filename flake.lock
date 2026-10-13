@@ -286,17 +286,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1788746983,
-        "narHash": "sha256-PtDrG/UQr686XRQk4ffY4Wwu+Z1UJw7BZYDdsIh+B84=",
+        "lastModified": 1788918641,
+        "narHash": "sha256-lJOHhrJ6ser1vs2m0pUnDpbnSgTtdTX/yXhCjvzCrTM=",
         "owner": "aome510",
         "repo": "spotify-player",
-        "rev": "6f94188ed6aae0d9c2cfecc25a434fc36a322df5",
+        "rev": "dac1fa7aa2c120cc67ead9e9c5c661ff017a2b94",
         "type": "github"
       },
       "original": {
         "owner": "aome510",
+        "ref": "v0.25.1",
         "repo": "spotify-player",
-        "rev": "6f94188ed6aae0d9c2cfecc25a434fc36a322df5",
         "type": "github"
       }
     },

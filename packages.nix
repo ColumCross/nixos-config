@@ -27,6 +27,7 @@ in
     google-chrome
     wget
     curl
+    jq
     discord
     ripgrep
     fd
@@ -42,6 +43,7 @@ in
     btop
     vlc
     element-desktop
+    obs-studio
 
     system-config-printer
     pandoc

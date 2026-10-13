@@ -15,7 +15,7 @@
     herdr.url = "github:herdrdev/herdr/v0.9.3";
 
     spotify-player = {
-      url = "github:aome510/spotify-player/6f94188ed6aae0d9c2cfecc25a434fc36a322df5";
+      url = "github:aome510/spotify-player/v0.25.1";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     nordvpn-module = {

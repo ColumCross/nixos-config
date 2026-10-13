@@ -443,6 +443,7 @@ in
       "$mainMod" = "SUPER";
 
       exec-once = [
+        "${workspace-topology}/bin/workspace-topology initialize"
         "nm-applet"
         "blueman-applet"
         "/run/current-system/sw/bin/nordvpn status >/dev/null 2>&1"

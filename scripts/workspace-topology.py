@@ -87,19 +87,23 @@ class Controller:
         else:
             self.run(["hyprctl", "keyword", "monitor", os.environ["WORKSPACE_TOPOLOGY_UNDOCKED_LAPTOP_RULE"]])
 
-    def apply(self, lid_open=None):
+    def apply(self, lid_open=None, initialize=False):
         monitors = self.monitors()
         lid_open = self.lid_is_open() if lid_open is None else lid_open
         self.reconcile_monitor(monitors, lid_open)
         monitors = self.monitors()
-        active = self.active_workspace()
+        docked = all(displays(monitors))
         include_laptop = lid_open or not any(displays(monitors))
         assignments = targets(monitors, include_laptop=include_laptop)
         for workspace, monitor in assignments.items():
             self.dispatch("workspace", f"name:{workspace}")
             self.dispatch("moveworkspacetomonitor", f"name:{workspace}", monitor)
         if assignments:
-            selector = str(active["id"]) if active["id"] > 0 else f"name:{active['name']}"
+            if initialize and not docked:
+                selector = "name:1"
+            else:
+                active = self.active_workspace()
+                selector = str(active["id"]) if active["id"] > 0 else f"name:{active['name']}"
             self.dispatch("workspace", selector)
 
 
@@ -123,6 +127,8 @@ def main(arguments):
     controller = Controller()
     if arguments == ["listen"]:
         listen(controller)
+    elif arguments == ["initialize"]:
+        controller.apply(initialize=True)
     elif arguments == ["lid", "open"]:
         controller.apply(lid_open=True)
     elif arguments == ["lid", "close"]:

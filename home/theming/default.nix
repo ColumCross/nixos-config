@@ -98,4 +98,9 @@ in {
     $DRY_RUN_CMD ln -sfnT "$selector_theme.rasi" "$HOME/.config/rofi/themes/current.rasi"
     $DRY_RUN_CMD ln -sfnT "styles/$selector_theme.css" "$HOME/.config/wlogout/style.css"
   '';
+
+  home.activation.configureObsSystemTheme = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    $DRY_RUN_CMD mkdir -p "$HOME/.config/obs-studio"
+    $DRY_RUN_CMD ${pkgs.crudini}/bin/crudini --set --ini-options=nospace "$HOME/.config/obs-studio/user.ini" Appearance Theme com.obsproject.System
+  '';
 }
