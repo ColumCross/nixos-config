@@ -48,6 +48,10 @@ in
     system-config-printer
     pandoc
 
+    # Weather clients
+    weathr
+    wthrr
+
     # Desktop utilities
     rofi
     brightnessctl

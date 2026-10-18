@@ -108,6 +108,8 @@
 
   programs.nix-ld.enable = true;
 
+  virtualisation.docker.enable = true;
+
   #################################
   ## XDG Portal
   #################################
@@ -158,6 +160,7 @@
       "wheel"
       "networkmanager"
       "bluetooth"
+      "docker"
     ];
 
     shell = pkgs.bash;

@@ -326,6 +326,10 @@ in
       gs = "git status";
       gl = "git log --oneline -10";
       gp = "git push";
+      stayawake = "systemd-inhibit --what=idle:sleep --why='Keeping system awake' sleep infinity";
+      staywoke = "systemd-inhibit --what=idle:sleep --why='Keeping system awake in background' sleep infinity &";
+      calc = "fend";
+      weather = "wthrr -f d,t,w";
     };
   };
 
