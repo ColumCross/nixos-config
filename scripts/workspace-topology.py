@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
+import fcntl
 import json
 import os
 import socket
 import subprocess
 import sys
 import time
+from contextlib import contextmanager
 
 
 LEFT_DISPLAY = "HP Inc. HP E243 CNC8501MRZ"
@@ -27,6 +29,8 @@ def targets(monitors, include_laptop=True):
         if laptop and include_laptop:
             result["3"] = laptop
         return result
+    if left or right:
+        return {}
     return {"1": laptop} if laptop and include_laptop else {}
 
 
@@ -52,6 +56,28 @@ class Controller:
         reply = self.run(["hyprctl", "--", "dispatch", dispatcher, *arguments])
         if reply != "ok":
             raise TopologyError(f"{dispatcher} failed: {reply or 'empty response'}")
+
+    @contextmanager
+    def lock(self):
+        runtime_dir = os.environ.get("XDG_RUNTIME_DIR")
+        signature = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE")
+        if not runtime_dir or not signature:
+            raise TopologyError("Hyprland session environment is unavailable")
+        lock_path = os.path.join(runtime_dir, f"workspace-control-{signature}.lock")
+        with open(lock_path, "w", encoding="utf-8") as lock_file:
+            deadline = time.monotonic() + 1
+            while True:
+                try:
+                    fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    break
+                except BlockingIOError:
+                    if time.monotonic() >= deadline:
+                        raise TopologyError("Another desktop reorder is still running")
+                    time.sleep(0.05)
+            try:
+                yield
+            finally:
+                fcntl.flock(lock_file, fcntl.LOCK_UN)
 
     def monitors(self):
         try:
@@ -88,23 +114,28 @@ class Controller:
             self.run(["hyprctl", "keyword", "monitor", os.environ["WORKSPACE_TOPOLOGY_UNDOCKED_LAPTOP_RULE"]])
 
     def apply(self, lid_open=None, initialize=False):
-        monitors = self.monitors()
-        lid_open = self.lid_is_open() if lid_open is None else lid_open
-        self.reconcile_monitor(monitors, lid_open)
-        monitors = self.monitors()
-        docked = all(displays(monitors))
-        include_laptop = lid_open or not any(displays(monitors))
-        assignments = targets(monitors, include_laptop=include_laptop)
-        for workspace, monitor in assignments.items():
-            self.dispatch("workspace", f"name:{workspace}")
-            self.dispatch("moveworkspacetomonitor", f"name:{workspace}", monitor)
-        if assignments:
-            if initialize and not docked:
-                selector = "name:1"
-            else:
-                active = self.active_workspace()
-                selector = str(active["id"]) if active["id"] > 0 else f"name:{active['name']}"
-            self.dispatch("workspace", selector)
+        with self.lock():
+            monitors = self.monitors()
+            lid_open = self.lid_is_open() if lid_open is None else lid_open
+            self.reconcile_monitor(monitors, lid_open)
+            monitors = self.monitors()
+            left, right = displays(monitors)
+            laptop_only = not left and not right
+            if laptop_only and not initialize:
+                return
+            active = self.active_workspace()
+            docked = bool(left and right)
+            include_laptop = lid_open or not any((left, right))
+            assignments = targets(monitors, include_laptop=include_laptop)
+            for workspace, monitor in assignments.items():
+                self.dispatch("workspace", f"name:{workspace}")
+                self.dispatch("moveworkspacetomonitor", f"name:{workspace}", monitor)
+            if assignments:
+                if initialize and not docked:
+                    selector = "name:1"
+                else:
+                    selector = str(active["id"]) if active["id"] > 0 else f"name:{active['name']}"
+                self.dispatch("workspace", selector)
 
 
 def listen(controller):

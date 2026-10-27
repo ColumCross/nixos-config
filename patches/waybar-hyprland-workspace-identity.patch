@@ -1,0 +1,63 @@
+diff --git a/src/modules/hyprland/workspaces.cpp b/src/modules/hyprland/workspaces.cpp
+--- a/src/modules/hyprland/workspaces.cpp
++++ b/src/modules/hyprland/workspaces.cpp
+@@ -71,8 +71,4 @@ void Workspaces::createWorkspace(Json::Value const& workspace_data,
+   // avoid recreating existing workspaces
+   auto workspace = std::ranges::find_if(m_workspaces, [&](std::unique_ptr<Workspace> const& w) {
+-    if (workspaceId > 0) {
+-      return w->id() == workspaceId;
+-    }
+-    return (workspaceName.starts_with("special:") && workspaceName.substr(8) == w->name()) ||
+-           workspaceName == w->name();
++    return w->id() == workspaceId;
+   });
+@@ -126,6 +122,20 @@ void Workspaces::doUpdate() {
+ void Workspaces::doUpdate() {
+   std::unique_lock lock(m_mutex);
+
++  auto const liveWorkspaces = m_ipc.getSocket1JsonReply("workspaces");
++  for (auto const& workspace : m_workspaces) {
++    auto liveWorkspace = std::ranges::find_if(liveWorkspaces, [&](Json::Value const& live) {
++      return live["id"].asInt() == workspace->id();
++    });
++    if (liveWorkspace == liveWorkspaces.end() ||
++        (!allOutputs() && m_bar.output->name != (*liveWorkspace)["monitor"].asString())) {
++      m_workspacesToRemove.push_back(std::to_string(workspace->id()));
++      continue;
++    }
++    workspace->setName((*liveWorkspace)["name"].asString());
++    workspace->setOutput((*liveWorkspace)["monitor"].asString());
++  }
++
+   removeWorkspacesToRemove();
+   createWorkspacesToCreate();
+   updateWorkspaceStates();
+@@ -1018,6 +1032,5 @@ void Workspaces::updateWindowCount() {
+   const Json::Value workspacesJson = m_ipc.getSocket1JsonReply("workspaces");
+   for (auto const& workspace : m_workspaces) {
+     auto workspaceJson = std::ranges::find_if(workspacesJson, [&](Json::Value const& x) {
+-      return x["name"].asString() == workspace->name() ||
+-             (workspace->isSpecial() && x["name"].asString() == "special:" + workspace->name());
++      return x["id"].asInt() == workspace->id();
+     });
+@@ -1067,11 +1076,4 @@ void Workspaces::updateWorkspaceStates() {
+-  auto currentWorkspace = m_ipc.getSocket1JsonReply("activeworkspace");
+-  std::string currentWorkspaceName =
+-      currentWorkspace.isMember("name") ? currentWorkspace["name"].asString() : "";
+-
+   for (auto& workspace : m_workspaces) {
+-    bool isActiveByName =
+-        !currentWorkspaceName.empty() && workspace->name() == currentWorkspaceName;
+-
+     workspace->setActive(
+-        workspace->id() == m_activeWorkspaceId || isActiveByName ||
++        workspace->id() == m_activeWorkspaceId ||
+         (workspace->isSpecial() && workspace->name() == m_activeSpecialWorkspaceName));
+@@ -1086,6 +1088,4 @@ void Workspaces::updateWorkspaceStates() {
+     }
+     auto updatedWorkspace = std::ranges::find_if(updatedWorkspaces, [&workspace](const auto& w) {
+-      auto wNameRaw = w["name"].asString();
+-      auto wName = wNameRaw.starts_with("special:") ? wNameRaw.substr(8) : wNameRaw;
+-      return wName == workspace->name();
++      return w["id"].asInt() == workspace->id();
+     });

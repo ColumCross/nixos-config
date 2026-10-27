@@ -7,7 +7,10 @@ let
   patched-waybar = pkgs.waybar.overrideAttrs (old: {
     patches =
       (old.patches or [])
-      ++ [ ../../patches/waybar-hyprland-workspace-dnd.patch ];
+      ++ [
+        ../../patches/waybar-hyprland-workspace-dnd.patch
+        ../../patches/waybar-hyprland-workspace-identity.patch
+      ];
   });
 in
 {

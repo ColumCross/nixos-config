@@ -44,6 +44,7 @@ in
     vlc
     element-desktop
     obs-studio
+    cliamp
 
     system-config-printer
     pandoc

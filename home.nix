@@ -326,8 +326,8 @@ in
       gs = "git status";
       gl = "git log --oneline -10";
       gp = "git push";
-      stayawake = "systemd-inhibit --what=idle:sleep --why='Keeping system awake' sleep infinity";
-      staywoke = "systemd-inhibit --what=idle:sleep --why='Keeping system awake in background' sleep infinity &";
+      stayawake = "systemd-inhibit --what=idle:sleep --why='Keeping system awake' weathr";
+      staywoke = "systemd-inhibit --what=idle:sleep:handle-lid-switch --why='Keeping system awake in background' sleep infinity &";
       calc = "fend";
       weather = "wthrr -f d,t,w";
     };
