@@ -46,6 +46,8 @@ in
     obs-studio
     cliamp
 
+    obsidian
+
     system-config-printer
     pandoc
 
